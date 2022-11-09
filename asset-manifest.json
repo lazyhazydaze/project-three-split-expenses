@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/project1-bootcamp/static/css/main.af1de1d1.css",
+    "main.js": "/project1-bootcamp/static/js/main.3723428b.js",
+    "index.html": "/project1-bootcamp/index.html",
+    "main.af1de1d1.css.map": "/project1-bootcamp/static/css/main.af1de1d1.css.map",
+    "main.3723428b.js.map": "/project1-bootcamp/static/js/main.3723428b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.af1de1d1.css",
+    "static/js/main.3723428b.js"
+  ]
+}
