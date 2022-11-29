@@ -1,56 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 
-export default class GroupForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { name: "" };
-  }
+export default function GroupForm(props) {
+  const [name, setName] = useState("");
 
-  handleUserInput = (e) => {
-    this.setState({
-      name: e.target.value,
-    });
+  const handleUserInput = ({ target }) => {
+    setName(target.value);
   };
 
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!this.state.name) {
+    if (!name) {
       return;
     }
 
-    const newName = this.state.name.toLowerCase();
+    const newName = name.toLowerCase();
 
-    if (this.props.nameList.includes(newName)) {
-      this.setState({
-        name: "",
-      });
+    if (props.nameList.includes(newName)) {
+      setName("");
     } else {
-      this.props.addName(newName);
-      this.setState({
-        name: "",
-      });
+      props.addName(newName);
+      setName("");
     }
   };
 
-  render() {
-    return (
-      <div>
-        <form onSubmit={this.handleSubmit}>
-          <input
-            className="input-field"
-            type="text"
-            placeholder="Enter Person Name"
-            maxLength={15}
-            onChange={this.handleUserInput}
-            value={this.state.name}
-          />
-          <br />
-          <br />
-          <center>
-            <input className="white-btn" type="submit" value="ADD" />
-          </center>
-        </form>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          className="input-field"
+          type="text"
+          placeholder="Enter Person Name"
+          maxLength={15}
+          onChange={handleUserInput}
+          value={name}
+        />
+        <br />
+        <br />
+        <center>
+          <input className="white-btn" type="submit" value="ADD" />
+        </center>
+      </form>
+    </div>
+  );
 }

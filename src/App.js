@@ -1,88 +1,80 @@
-import React from "react";
+import React, { useState } from "react";
+// import { ref as databaseRef, push, set } from "firebase/database";
+// import { database } from "./firebase";
 import "./App.css";
 import DisplayExpense from "./components/DisplayExpense";
 import ExpenseForm from "./components/ExpenseForm";
 import GroupForm from "./components/GroupForm";
 import SplitBill from "./components/SplitBill";
-import TrashBinIcon from "./components/TrashBinIcon";
 import ReceiptDisplay from "./components/ReceiptDisplay";
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      uniqueNames: [],
-      overallReceipt: {},
-      group: [],
-      expenses: [],
-      hover: -1,
-    };
-  }
+export default function App() {
+  const [uniqueNames, setUniqueNames] = useState([]);
+  const [overallReceipt, setOverallReceipt] = useState({});
+  const [group, setGroup] = useState([]);
+  const [expenses, setExpenses] = useState([]);
 
-  componentDidMount() {
-    let state = localStorage.getItem("state");
-    state = JSON.parse(state);
-    this.setState(state);
-  }
+  // Container 1 (form) and Container 4 (display)
+  // Related functions: addName & deleteName
+  // Related child component: GroupForm (form)
+  // Updates this.state.group array with strings of names
 
-  componentDidUpdate() {
-    localStorage.setItem("state", JSON.stringify(this.state));
-  }
-
-  addName = (name) => {
-    let newGroup = [...this.state.group, name];
-    this.setState({
-      group: newGroup,
-    });
+  const addName = (name) => {
+    const newGroup = [...group, name];
+    setGroup(newGroup);
   };
 
-  deleteName = (name) => {
-    let filteredGroup = this.state.group.filter((x) => x !== name);
-
-    this.setState({
-      group: filteredGroup,
-    });
+  const deleteName = (name) => {
+    const filteredGroup = group.filter((x) => x !== name);
+    setGroup(filteredGroup);
   };
 
-  deleteRecord = (e) => {
+  // Container 2 (form) and Records section (display)
+  // Related functions: deleteRecord, addRecord, clearRecords
+  // Related child component: ExpenseForm (form)
+  // Related sibling component: DisplayExpense (display)
+  // Updates this.state.expense array with objects
+
+  const addRecord = (record) => {
+    const newArray = [...expenses, record];
+    console.log("line 72", newArray);
+    setExpenses(newArray);
+  };
+
+  const deleteRecord = (e) => {
     // deleteRecord takes in a parameter (like addName or deleteName)
     // e is the event, e.target is the button, the value in e.target.value is defined in Line 38 of dispay expense which takes its value from the id which is an index.
     let key = e.target.value;
-    let newexpenses = [...this.state.expenses];
+    let newexpenses = [...expenses];
     newexpenses.splice(key, 1);
-    this.setState({
-      expenses: newexpenses,
-    });
+    setExpenses(newexpenses);
   };
 
-  addRecord = (record) => {
-    let newArray = [...this.state.expenses, record];
-    this.setState({
-      expenses: newArray,
-    });
+  const clearRecords = () => {
+    setExpenses([]);
   };
 
-  clearRecords = () => {
-    this.setState({
-      expenses: [],
-    });
-  };
+  // Container 3 (button) and same container (display)
+  // Related functions: splitBill
+  // Related child component: ReceiptDisplay (display)
+  // Updates this.state.uniqueNames array with strings of names from this.state.expenses
+  // Updates this.state.overallReceipt object (not array) with dictionary of purchases, item price, and total with name as key
 
-  splitBill = () => {
-    let expensesList = [...this.state.expenses];
+  const splitBill = () => {
+    let expensesList = [...expenses];
     let spenderList = [];
     for (let i = 0; i < expensesList.length; i++) {
       spenderList = [...spenderList, ...expensesList[i].spenders];
     }
-    let uniqueNames = [...new Set(spenderList)];
+    let uniqueNamesList = [...new Set(spenderList)];
 
     let newReceipt = {};
-    for (let k = 0; k < uniqueNames.length; k++) {
+    for (let k = 0; k < uniqueNamesList.length; k++) {
       var purchase = [];
       var cost = [];
       var initialValue = 0;
       for (let j = 0; j < expensesList.length; j++) {
-        if (expensesList[j]["spenders"].includes(uniqueNames[k])) {
+        if (expensesList[j]["spenders"].includes(uniqueNamesList[k])) {
           purchase.push(expensesList[j]["item"]);
           cost.push(
             expensesList[j]["amount"] / expensesList[j]["spenders"].length
@@ -98,123 +90,86 @@ class App extends React.Component {
           ),
         };
       }
-      newReceipt[uniqueNames[k]] = record;
+      newReceipt[uniqueNamesList[k]] = record;
     }
-    console.log("this.state.newReceipt", newReceipt);
-    console.log("this.state.uniqueNames", uniqueNames);
-    this.setState({
-      overallReceipt: newReceipt,
-      uniqueNames: uniqueNames,
-    });
+    console.log("state newReceipt", newReceipt);
+    console.log("state uniqueNames", uniqueNamesList);
+    setOverallReceipt(newReceipt);
+    setUniqueNames(uniqueNamesList);
   };
 
-  onMouseEnter = (e) => {
-    this.setState({ hover: e.target.value });
-  };
+  let copyGroup = [...group];
+  let copyExpenses = [...expenses];
+  let copyUniqueNames = [...uniqueNames];
+  let sortUniqueNames = copyUniqueNames.sort();
+  let copyOverallReceipt = overallReceipt;
 
-  onMouseLeave = (e) => {
-    console.log(e.target);
-    this.setState({ hover: -1 });
-  };
-
-  render() {
-    let copyGroup = [...this.state.group];
-    let copyExpenses = [...this.state.expenses];
-    let copyUniqueNames = [...this.state.uniqueNames];
-    let sortUniqueNames = copyUniqueNames.sort();
-    let copyOverallReceipt = this.state.overallReceipt;
-
-    return (
-      <div>
-        <center>
-          <h1 className="bangers">Split ⚡ My ⚡ Bill</h1>
-        </center>
-        <div className="flex-container">
-          <div className="green-container">
-            <center>
-              <h4 className="step">1. Add person</h4>
-            </center>
-            <GroupForm nameList={this.state.group} addName={this.addName} />
-          </div>
-
-          <div className="green-container">
-            <center>
-              <h4 className="step">2. Add item</h4>
-            </center>
-            <ExpenseForm
-              fullNameList={this.state.group}
-              action={this.addRecord}
-            />
-          </div>
-
-          <div className="green-container">
-            <center>
-              <h4 className="step">3. View Receipt</h4>
-            </center>
-            <div className="flex-receipt">
-              {sortUniqueNames.map((name) => (
-                <ReceiptDisplay
-                  name={name}
-                  receipt={copyOverallReceipt[name]}
-                />
-              ))}
-            </div>
-            <SplitBill
-              uniqueName={this.state.uniqueNames}
-              action={this.splitBill}
-            />
-          </div>
-
-          <div className="green-container">
-            <center>
-              <h4 className="step">4. Edit Group List</h4>
-            </center>
-            <div className="flex-grouplist">
-              {copyGroup.map((k, i) => (
-                <div>
-                  {k}{" "}
-                  <button
-                    className="bin-btn"
-                    value={i}
-                    onClick={() => this.deleteName(k)}
-                    onMouseEnter={this.onMouseEnter}
-                    onMouseLeave={this.onMouseLeave}
-                  >
-                    <TrashBinIcon value={i} hover={this.state.hover} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <br />
-
-        <div>
+  return (
+    <div>
+      <div className="flex-container">
+        <div className="green-container">
           <center>
-            {this.state.expenses.length > 0 && (
-              <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
-            )}
+            <h4 className="step">1. Add person</h4>
           </center>
-          <div className="row-flex">
-            {copyExpenses.map((entry, i) => (
-              <DisplayExpense
-                {...entry}
-                key={i}
-                id={i}
-                deleteRecord={this.deleteRecord}
-              />
+          <GroupForm nameList={group} addName={addName} />
+        </div>
+
+        <div className="green-container">
+          <center>
+            <h4 className="step">2. Add item</h4>
+          </center>
+          <ExpenseForm fullNameList={group} action={addRecord} />
+        </div>
+        <div className="green-container">
+          <center>
+            <h4 className="step">3. View Receipt</h4>
+          </center>
+          <div className="flex-receipt">
+            {sortUniqueNames.map((name) => (
+              <ReceiptDisplay name={name} receipt={copyOverallReceipt[name]} />
+            ))}
+          </div>
+          <SplitBill uniqueName={uniqueNames} action={splitBill} />
+        </div>
+
+        <div className="green-container">
+          <center>
+            <h4 className="step">4. Edit Group List</h4>
+          </center>
+          <div className="flex-grouplist">
+            {copyGroup.map((k, i) => (
+              <div>
+                {k} <button onClick={() => deleteName(k)}>x</button>
+              </div>
             ))}
           </div>
         </div>
-        <br />
-        {this.state.expenses.length > 0 && (
-          <center>
-            <button onClick={this.clearRecords}>Clear all</button>
-          </center>
-        )}
       </div>
-    );
-  }
-}
+      <br />
 
-export default App;
+      <div>
+        <center>
+          {expenses.length > 0 && (
+            <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
+          )}
+        </center>
+        <div className="row-flex">
+          {copyExpenses.map((entry, i) => (
+            <DisplayExpense
+              {...entry}
+              key={i}
+              id={i}
+              deleteRecord={deleteRecord}
+            />
+          ))}
+        </div>
+      </div>
+      <br />
+      {expenses.length > 0 && (
+        <center>
+          <button onClick={clearRecords}>Clear all</button>
+        </center>
+      )}
+    </div>
+  );
+}
