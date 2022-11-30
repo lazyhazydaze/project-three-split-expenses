@@ -3,18 +3,18 @@ import React, { useState } from "react";
 export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
   const [amount, setAmount] = useState("");
-  const [spenders, setSpenders] = useState([]);
+  const [splitBy, setSplitBy] = useState([]);
   const [start, setStart] = useState(true);
 
   const handleChangeCheckBox = (e) => {
     const { checked, value } = e.target;
 
     if (checked) {
-      const newSpenderList = [...spenders, value];
-      setSpenders(newSpenderList);
+      const newSpenderList = [...splitBy, value];
+      setSplitBy(newSpenderList);
       setStart(false);
     } else {
-      setSpenders(spenders.filter((e) => e !== value));
+      setSplitBy(splitBy.filter((e) => e !== value));
       setStart(false);
     }
   };
@@ -22,7 +22,7 @@ export default function ExpenseForm(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (spenders.length < 1) {
+    if (splitBy.length < 1) {
       alert("Please select spender field");
       return;
     }
@@ -30,13 +30,13 @@ export default function ExpenseForm(props) {
     const record = {
       item: item,
       amount: amount,
-      spenders: spenders,
+      splitBy: splitBy,
     };
 
     props.action(record);
     setItem("");
     setAmount("");
-    setSpenders([]);
+    setSplitBy([]);
     setStart(true);
   };
 

@@ -17,7 +17,7 @@ const getRandomColor = () => {
 
 export default function DisplayExpense(props) {
   const pricePerPax = () => {
-    let output = (props.amount / props.spenders.length).toFixed(2);
+    let output = (props.amount / props.splitBy.length).toFixed(2);
     return output;
   };
 
@@ -32,7 +32,7 @@ export default function DisplayExpense(props) {
         </p>
         <p>
           <p>
-            <i>{props.spenders.join(" ")}</i>{" "}
+            <i>{props.splitBy.join(" ")}</i>{" "}
           </p>
         </p>
         <button value={props.id} onClick={props.deleteRecord}>
