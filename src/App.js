@@ -1,20 +1,24 @@
 import React, { useState } from "react";
-// import { ref as databaseRef, push, set } from "firebase/database";
-// import { database } from "./firebase";
+import { ref as databaseRef, push, set } from "firebase/database";
+import { database } from "./firebase";
 import "./App.css";
 import DisplayExpense from "./components/DisplayExpense";
 import ExpenseForm from "./components/ExpenseForm";
 import GroupForm from "./components/GroupForm";
 import SplitBill from "./components/SplitBill";
 import ReceiptDisplay from "./components/ReceiptDisplay";
+import InvoiceForm from "./components/InvoiceForm";
 
 export default function App() {
   const [uniqueNames, setUniqueNames] = useState([]);
   const [overallReceipt, setOverallReceipt] = useState({});
   const [group, setGroup] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [invoice, setInvoice] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
 
-  // Container 1 (form) and Container 4 (display)
+  // Container 1A (form) and Container 4 (display)
   // Related functions: addName & deleteName
   // Related child component: GroupForm (form)
   // Updates this.state.group array with strings of names
@@ -27,6 +31,20 @@ export default function App() {
   const deleteName = (name) => {
     const filteredGroup = group.filter((x) => x !== name);
     setGroup(filteredGroup);
+  };
+
+  // Container 1B (form)
+
+  const changeInvoice = (newInvoiceName) => {
+    setInvoice(newInvoiceName);
+  };
+
+  const changeAuthor = (newAuthor) => {
+    setAuthor(newAuthor);
+  };
+
+  const changeDate = (newDate) => {
+    setDate(newDate);
   };
 
   // Container 2 (form) and Records section (display)
@@ -61,10 +79,19 @@ export default function App() {
   // Updates this.state.overallReceipt object (not array) with dictionary of purchases, item price, and total with name as key
 
   const splitBill = () => {
+    const dbRef = push(databaseRef(database, "INVOICE"));
+    set(dbRef, {
+      invoice,
+      author,
+      date,
+      group,
+      expenses,
+    });
+
     let expensesList = [...expenses];
     let spenderList = [];
     for (let i = 0; i < expensesList.length; i++) {
-      spenderList = [...spenderList, ...expensesList[i].spenders];
+      spenderList = [...spenderList, ...expensesList[i].splitBy];
     }
     let uniqueNamesList = [...new Set(spenderList)];
 
@@ -74,10 +101,10 @@ export default function App() {
       var cost = [];
       var initialValue = 0;
       for (let j = 0; j < expensesList.length; j++) {
-        if (expensesList[j]["spenders"].includes(uniqueNamesList[k])) {
+        if (expensesList[j]["splitBy"].includes(uniqueNamesList[k])) {
           purchase.push(expensesList[j]["item"]);
           cost.push(
-            expensesList[j]["amount"] / expensesList[j]["spenders"].length
+            expensesList[j]["amount"] / expensesList[j]["splitBy"].length
           );
         }
 
@@ -109,7 +136,7 @@ export default function App() {
       <div className="flex-container">
         <div className="green-container">
           <center>
-            <h4 className="step">1. Add person</h4>
+            <h4 className="step">1A. Who splitting with you</h4>
           </center>
           <GroupForm nameList={group} addName={addName} />
         </div>
@@ -146,6 +173,17 @@ export default function App() {
         </div>
       </div>
       <br />
+
+      <div>
+        <InvoiceForm
+          updateInvoice={changeInvoice}
+          updateAuthor={changeAuthor}
+          updateDate={changeDate}
+          invoiceDisplay={invoice}
+          authorDisplay={author}
+          dateDisplay={date}
+        />
+      </div>
 
       <div>
         <center>
