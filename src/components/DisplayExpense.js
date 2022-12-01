@@ -1,4 +1,6 @@
 import React from "react";
+import { ref as databaseRef, remove } from "firebase/database";
+import { database } from "../firebase";
 import "./DisplayExpense.css";
 
 const getFormattedPrice = (price) => {
@@ -21,6 +23,14 @@ export default function DisplayExpense(props) {
     return output;
   };
 
+  const deleteRecord = () => {
+    const db = databaseRef(
+      database,
+      "invoice/" + props.keyval + "/expenses/" + props.id
+    );
+    remove(db);
+  };
+
   return (
     <div className="column">
       <div className="card">
@@ -35,7 +45,7 @@ export default function DisplayExpense(props) {
             <i>{props.splitBy.join(" ")}</i>{" "}
           </p>
         </p>
-        <button value={props.id} onClick={props.deleteRecord}>
+        <button value={props.id} onClick={deleteRecord}>
           ✖
         </button>
       </div>

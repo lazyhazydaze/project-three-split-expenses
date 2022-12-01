@@ -14,7 +14,6 @@ body {
   flex-wrap: wrap;
   justify-content: space-evenly;
   padding-top: 5px;
-  max-width: 300px;
 }
 
 .flex-receipt {
@@ -107,9 +106,8 @@ body {
 
 .flex-spender {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   flex-flow: row wrap;
-  max-width: 300px;
 }
 
 .white-btn {

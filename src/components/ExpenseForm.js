@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { ref as databaseRef, push, set } from "firebase/database";
+import { database } from "../firebase";
 
 export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
@@ -32,8 +34,10 @@ export default function ExpenseForm(props) {
       amount: amount,
       splitBy: splitBy,
     };
-
-    props.action(record);
+    const dbRef = push(
+      databaseRef(database, "invoice/" + props.keyval + "/expenses")
+    );
+    set(dbRef, record);
     setItem("");
     setAmount("");
     setSplitBy([]);
@@ -46,7 +50,6 @@ export default function ExpenseForm(props) {
     <div>
       <form onSubmit={handleSubmit}>
         <input
-          className="input-field"
           type="text"
           name="item"
           maxLength={24}
@@ -56,7 +59,6 @@ export default function ExpenseForm(props) {
           placeholder="Enter Item Name"
         />
         <input
-          className="input-field"
           type="text"
           name="amount"
           value={amount}
@@ -100,7 +102,7 @@ export default function ExpenseForm(props) {
         <br />
         <br />
         <center>
-          <input className="white-btn" type="submit" value="SUBMIT" />
+          <input type="submit" value="add record" />
         </center>
       </form>
     </div>

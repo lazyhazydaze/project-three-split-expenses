@@ -1,93 +1,35 @@
 import React, { useState } from "react";
-import { ref as databaseRef, push, set } from "firebase/database";
+import { ref as databaseRef, onValue, remove } from "firebase/database";
 import { database } from "./firebase";
 import "./App.css";
 import DisplayExpense from "./components/DisplayExpense";
 import ExpenseForm from "./components/ExpenseForm";
-import GroupForm from "./components/GroupForm";
 import SplitBill from "./components/SplitBill";
 import ReceiptDisplay from "./components/ReceiptDisplay";
 import InvoiceForm from "./components/InvoiceForm";
+import InvoiceRetrieve from "./components/InvoiceRetrieve";
 
 export default function App() {
   const [uniqueNames, setUniqueNames] = useState([]);
   const [overallReceipt, setOverallReceipt] = useState({});
-  const [group, setGroup] = useState([]);
   const [expenses, setExpenses] = useState([]);
-  const [invoice, setInvoice] = useState("");
-  const [author, setAuthor] = useState("");
-  const [date, setDate] = useState("");
+  const [currentRecord, setCurrentRecord] = useState({});
+  const [currentKey, setCurrentKey] = useState("");
 
-  // Container 1A (form) and Container 4 (display)
-  // Related functions: addName & deleteName
-  // Related child component: GroupForm (form)
-  // Updates this.state.group array with strings of names
-
-  const addName = (name) => {
-    const newGroup = [...group, name];
-    setGroup(newGroup);
-  };
-
-  const deleteName = (name) => {
-    const filteredGroup = group.filter((x) => x !== name);
-    setGroup(filteredGroup);
-  };
-
-  // Container 1B (form)
-
-  const changeInvoice = (newInvoiceName) => {
-    setInvoice(newInvoiceName);
-  };
-
-  const changeAuthor = (newAuthor) => {
-    setAuthor(newAuthor);
-  };
-
-  const changeDate = (newDate) => {
-    setDate(newDate);
-  };
-
-  // Container 2 (form) and Records section (display)
-  // Related functions: deleteRecord, addRecord, clearRecords
-  // Related child component: ExpenseForm (form)
-  // Related sibling component: DisplayExpense (display)
-  // Updates this.state.expense array with objects
-
-  const addRecord = (record) => {
-    const newArray = [...expenses, record];
-    console.log("line 72", newArray);
-    setExpenses(newArray);
-  };
-
-  const deleteRecord = (e) => {
-    // deleteRecord takes in a parameter (like addName or deleteName)
-    // e is the event, e.target is the button, the value in e.target.value is defined in Line 38 of dispay expense which takes its value from the id which is an index.
-    let key = e.target.value;
-    let newexpenses = [...expenses];
-    newexpenses.splice(key, 1);
-    setExpenses(newexpenses);
+  const setCurrentRecordListener = (keyval) => {
+    setCurrentKey(keyval);
+    const db = databaseRef(database, "invoice/" + keyval);
+    onValue(db, (snapshot) => {
+      setCurrentRecord(snapshot.val());
+    });
   };
 
   const clearRecords = () => {
-    setExpenses([]);
+    const db = databaseRef(database, "invoice/" + currentKey + "/expenses");
+    remove(db);
   };
 
-  // Container 3 (button) and same container (display)
-  // Related functions: splitBill
-  // Related child component: ReceiptDisplay (display)
-  // Updates this.state.uniqueNames array with strings of names from this.state.expenses
-  // Updates this.state.overallReceipt object (not array) with dictionary of purchases, item price, and total with name as key
-
   const splitBill = () => {
-    const dbRef = push(databaseRef(database, "INVOICE"));
-    set(dbRef, {
-      invoice,
-      author,
-      date,
-      group,
-      expenses,
-    });
-
     let expensesList = [...expenses];
     let spenderList = [];
     for (let i = 0; i < expensesList.length; i++) {
@@ -125,89 +67,112 @@ export default function App() {
     setUniqueNames(uniqueNamesList);
   };
 
-  let copyGroup = [...group];
-  let copyExpenses = [...expenses];
   let copyUniqueNames = [...uniqueNames];
   let sortUniqueNames = copyUniqueNames.sort();
   let copyOverallReceipt = overallReceipt;
 
   return (
     <div>
-      <div className="flex-container">
-        <div className="green-container">
-          <center>
-            <h4 className="step">1A. Who splitting with you</h4>
-          </center>
-          <GroupForm nameList={group} addName={addName} />
-        </div>
-
-        <div className="green-container">
-          <center>
-            <h4 className="step">2. Add item</h4>
-          </center>
-          <ExpenseForm fullNameList={group} action={addRecord} />
-        </div>
-        <div className="green-container">
-          <center>
-            <h4 className="step">3. View Receipt</h4>
-          </center>
-          <div className="flex-receipt">
-            {sortUniqueNames.map((name) => (
-              <ReceiptDisplay name={name} receipt={copyOverallReceipt[name]} />
-            ))}
-          </div>
-          <SplitBill uniqueName={uniqueNames} action={splitBill} />
-        </div>
-
-        <div className="green-container">
-          <center>
-            <h4 className="step">4. Edit Group List</h4>
-          </center>
-          <div className="flex-grouplist">
-            {copyGroup.map((k, i) => (
-              <div>
-                {k} <button onClick={() => deleteName(k)}>x</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <br />
-
       <div>
-        <InvoiceForm
-          updateInvoice={changeInvoice}
-          updateAuthor={changeAuthor}
-          updateDate={changeDate}
-          invoiceDisplay={invoice}
-          authorDisplay={author}
-          dateDisplay={date}
-        />
+        <u>
+          <h1>This is the HOMEPAGE.</h1>
+        </u>
+        <p>
+          It has a dashboard, a section for invoices, and sidebar with a{" "}
+          <button>Split-A-Bill</button> link.
+        </p>
+        <h2>Invoices section</h2>
+        <InvoiceRetrieve setCurrentRecordListener={setCurrentRecordListener} />
       </div>
-
+      <hr />
       <div>
+        <u>
+          <h1>
+            On clicking <button>Split-A-Bill</button> from Homepage sidemenu{" "}
+          </h1>
+        </u>
         <center>
-          {expenses.length > 0 && (
-            <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
+          <h2>Who's splitting with you || Name your invoice</h2>
+        </center>
+      </div>
+
+      <div className="green-container">
+        <center>
+          <InvoiceForm />
+        </center>
+      </div>
+      <hr />
+
+      <div>
+        <u>
+          <h1>
+            On clicking <button>Next</button>, will direct back to HOMEPAGE, and
+            invoices section is updated with a record that is clickable.
+          </h1>
+        </u>
+      </div>
+      <hr />
+      <div>
+        <u>
+          <h1>On clicking the record under the Invoice section</h1>
+        </u>
+        <center>
+          <h2>{currentRecord.invoice}</h2>
+          <h3>
+            📅 {currentRecord.date} || ✍ {currentRecord.author}{" "}
+          </h3>
+          <br />
+          <h4>
+            {currentRecord.group ? currentRecord.group.length : 0} members:
+          </h4>
+          <div className="flex-grouplist">
+            {currentRecord.group &&
+              currentRecord.group.map((k, i) => <div>{k}</div>)}
+          </div>
+        </center>
+        <center>
+          <h2>Expenses Records || Split Bill</h2>
+        </center>
+      </div>
+
+      <div className="green-container">
+        <center>
+          <h4>2. Add item</h4>
+        </center>
+        <ExpenseForm
+          keyval={currentKey}
+          fullNameList={currentRecord.group ? currentRecord.group : ""}
+        />
+        <br />
+        <SplitBill uniqueName={uniqueNames} action={splitBill} />
+        <center>
+          <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
+          <br />
+          <div className="row-flex">
+            {currentRecord.expenses &&
+              Object.keys(currentRecord.expenses).map((entry) => (
+                <DisplayExpense
+                  {...currentRecord.expenses[entry]}
+                  keyval={currentKey}
+                  id={entry}
+                />
+              ))}
+          </div>
+          {currentRecord.expenses && (
+            <button onClick={clearRecords}>Clear all</button>
           )}
         </center>
-        <div className="row-flex">
-          {copyExpenses.map((entry, i) => (
-            <DisplayExpense
-              {...entry}
-              key={i}
-              id={i}
-              deleteRecord={deleteRecord}
-            />
+      </div>
+      <div className="green-container">
+        <center>
+          <h4>3. final split bill</h4>
+        </center>
+        <div className="flex-receipt">
+          {sortUniqueNames.map((name) => (
+            <ReceiptDisplay name={name} receipt={copyOverallReceipt[name]} />
           ))}
         </div>
       </div>
-      <br />
-      {expenses.length > 0 && (
-        <center>
-          <button onClick={clearRecords}>Clear all</button>
-        </center>
-      )}
     </div>
   );
 }

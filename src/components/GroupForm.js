@@ -27,18 +27,13 @@ export default function GroupForm(props) {
     <div>
       <form onSubmit={handleSubmit}>
         <input
-          className="input-field"
           type="text"
           placeholder="Enter Person Name"
           maxLength={15}
           onChange={handleUserInput}
           value={name}
         />
-        <br />
-        <br />
-        <center>
-          <input className="white-btn" type="submit" value="ADD" />
-        </center>
+        <input type="submit" value="ADD" />
       </form>
     </div>
   );
