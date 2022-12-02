@@ -5,6 +5,7 @@ import InvoiceDisplay from "./InvoiceDisplay";
 
 export default function InvoiceRetrieve(props) {
   const [invoiceList, setInvoiceList] = useState([]);
+  const [filteredInvoiceList, setFilteredInvoiceList] = useState([]);
 
   useEffect(() => {
     const db = databaseRef(database, "invoice");
@@ -13,6 +14,8 @@ export default function InvoiceRetrieve(props) {
       //console.log("snapshot.val()", snapshot.val());
     });
   }, []);
+
+
 
   return (
     <div className="row-flex">
@@ -28,7 +31,7 @@ export default function InvoiceRetrieve(props) {
           />
         ))
       ) : (
-        <p>[No invoices to be displayed.]</p>
+        <p>No records 🎉. Click <button>Split the bill</button> to start.</p>
       )}
     </div>
   );

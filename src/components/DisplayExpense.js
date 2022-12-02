@@ -26,7 +26,7 @@ export default function DisplayExpense(props) {
   const deleteRecord = () => {
     const db = databaseRef(
       database,
-      "invoice/" + props.keyval + "/expenses/" + props.id
+      "invoice/" + props.invoicekey + "/expenses/" + props.expensekey
     );
     remove(db);
   };
@@ -45,7 +45,7 @@ export default function DisplayExpense(props) {
             <i>{props.splitBy.join(" ")}</i>{" "}
           </p>
         </p>
-        <button value={props.id} onClick={deleteRecord}>
+        <button value={props.expensekey} onClick={deleteRecord}>
           ✖
         </button>
       </div>

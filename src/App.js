@@ -1,18 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ref as databaseRef, onValue, remove } from "firebase/database";
 import { database } from "./firebase";
 import "./App.css";
 import DisplayExpense from "./components/DisplayExpense";
 import ExpenseForm from "./components/ExpenseForm";
-import SplitBill from "./components/SplitBill";
 import ReceiptDisplay from "./components/ReceiptDisplay";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState("Myself");
   const [uniqueNames, setUniqueNames] = useState([]);
   const [overallReceipt, setOverallReceipt] = useState({});
-  const [expenses, setExpenses] = useState([]);
   const [currentRecord, setCurrentRecord] = useState({});
   const [currentKey, setCurrentKey] = useState("");
 
@@ -24,51 +23,52 @@ export default function App() {
     });
   };
 
+  useEffect(() => {
+    splitBill();
+  }, [currentRecord]);
+
   const clearRecords = () => {
     const db = databaseRef(database, "invoice/" + currentKey + "/expenses");
     remove(db);
   };
 
   const splitBill = () => {
-    let expensesList = [...expenses];
-    let spenderList = [];
-    for (let i = 0; i < expensesList.length; i++) {
-      spenderList = [...spenderList, ...expensesList[i].splitBy];
-    }
-    let uniqueNamesList = [...new Set(spenderList)];
-
-    let newReceipt = {};
-    for (let k = 0; k < uniqueNamesList.length; k++) {
-      var purchase = [];
-      var cost = [];
-      var initialValue = 0;
-      for (let j = 0; j < expensesList.length; j++) {
-        if (expensesList[j]["splitBy"].includes(uniqueNamesList[k])) {
-          purchase.push(expensesList[j]["item"]);
-          cost.push(
-            expensesList[j]["amount"] / expensesList[j]["splitBy"].length
-          );
-        }
-
-        var record = {
-          purchases: purchase,
-          costprice: cost,
-          total: cost.reduce(
-            (previousValue, currentValue) => previousValue + currentValue,
-            initialValue
-          ),
-        };
+    if ("expenses" in currentRecord) {
+      let spenderList = [];
+      for (const [key, value] of Object.entries(currentRecord.expenses)) {
+        spenderList = spenderList.concat(value.splitBy);
       }
-      newReceipt[uniqueNamesList[k]] = record;
+
+      let uniqueNamesList = [...new Set(spenderList)];
+
+      let newReceipt = {};
+      for (let k = 0; k < uniqueNamesList.length; k++) {
+        var purchase = [];
+        var cost = [];
+        var initialValue = 0;
+        for (const [key, value] of Object.entries(currentRecord.expenses)) {
+          if (value["splitBy"].includes(uniqueNamesList[k])) {
+            purchase.push(value["item"]);
+            cost.push(value["amount"] / value["splitBy"].length);
+          }
+
+          var record = {
+            purchases: purchase,
+            costprice: cost,
+            total: cost.reduce(
+              (previousValue, currentValue) => previousValue + currentValue,
+              initialValue
+            ),
+          };
+        }
+        newReceipt[uniqueNamesList[k]] = record;
+      }
+      setOverallReceipt(newReceipt);
+      setUniqueNames(uniqueNamesList);
     }
-    console.log("state newReceipt", newReceipt);
-    console.log("state uniqueNames", uniqueNamesList);
-    setOverallReceipt(newReceipt);
-    setUniqueNames(uniqueNamesList);
   };
 
-  let copyUniqueNames = [...uniqueNames];
-  let sortUniqueNames = copyUniqueNames.sort();
+  let sortUniqueNames = [...uniqueNames].sort();
   let copyOverallReceipt = overallReceipt;
 
   return (
@@ -77,6 +77,7 @@ export default function App() {
         <u>
           <h1>This is the HOMEPAGE.</h1>
         </u>
+        Current username: <input type="text" value={currentUser} onChange={({target}) => setCurrentUser(target.value)} placeholder="current username" />
         <p>
           It has a dashboard, a section for invoices, and sidebar with a{" "}
           <button>Split-A-Bill</button> link.
@@ -144,17 +145,18 @@ export default function App() {
           fullNameList={currentRecord.group ? currentRecord.group : ""}
         />
         <br />
-        <SplitBill uniqueName={uniqueNames} action={splitBill} />
+
         <center>
           <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
           <br />
+          {console.log("line 151", currentRecord.expenses)}
           <div className="row-flex">
             {currentRecord.expenses &&
               Object.keys(currentRecord.expenses).map((entry) => (
                 <DisplayExpense
                   {...currentRecord.expenses[entry]}
-                  keyval={currentKey}
-                  id={entry}
+                  invoicekey={currentKey}
+                  expensekey={entry}
                 />
               ))}
           </div>
