@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ref as databaseRef, push, set } from "firebase/database";
 import { database } from "../firebase";
 import GroupForm from "./GroupForm";
@@ -7,7 +7,7 @@ export default function InvoiceForm(props) {
   const [invoice, setInvoice] = useState("");
   const [author, setAuthor] = useState("");
   const [date, setDate] = useState("");
-  const [group, setGroup] = useState(["myself"]);
+  const [group, setGroup] = useState([props.currentUser]);
 
   const addName = (name) => {
     const newGroup = [...group, name];
@@ -29,10 +29,16 @@ export default function InvoiceForm(props) {
       group,
     });
     setInvoice("");
-    setAuthor("");
     setDate("");
-    setGroup(["myself"]);
+    setGroup([props.currentUser]);
   };
+
+  useEffect(() => {
+    setAuthor(props.currentUser);
+    const newGroup = [...group];
+    newGroup[0] = props.currentUser;
+    setGroup(newGroup);
+  }, [props.currentUser]);
 
   let copyGroup = [...group];
 
@@ -42,7 +48,6 @@ export default function InvoiceForm(props) {
         <h4>1A. Who splitting with you</h4>
         <GroupForm nameList={group} addName={addName} />
         <br />
-        <button>Continue to 1B. </button>
       </center>
       <hr />
 
@@ -51,7 +56,7 @@ export default function InvoiceForm(props) {
       <div className="flex-grouplist">
         {copyGroup.map((k, i) => (
           <div>
-            {k} <button onClick={() => deleteName(k)}>x</button>
+            {k} {i !== 0 && <button onClick={() => deleteName(k)}>x</button>}
           </div>
         ))}
       </div>
@@ -63,14 +68,6 @@ export default function InvoiceForm(props) {
           value={invoice}
           placeholder="Enter Invoice Name"
           onChange={({ target }) => setInvoice(target.value)}
-          required
-        />
-        <input
-          type="text"
-          name="author"
-          value={author}
-          placeholder="Enter Author Name"
-          onChange={({ target }) => setAuthor(target.value)}
           required
         />
         <input

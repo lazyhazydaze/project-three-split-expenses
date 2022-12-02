@@ -45,9 +45,9 @@ export default function DisplayExpense(props) {
             <i>{props.splitBy.join(" ")}</i>{" "}
           </p>
         </p>
-        <button value={props.expensekey} onClick={deleteRecord}>
+        {props.deleterights&&<button value={props.expensekey} onClick={deleteRecord}>
           ✖
-        </button>
+        </button>}
       </div>
     </div>
   );

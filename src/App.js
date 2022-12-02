@@ -9,7 +9,7 @@ import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState("Myself");
+  const [currentUser, setCurrentUser] = useState("myself");
   const [uniqueNames, setUniqueNames] = useState([]);
   const [overallReceipt, setOverallReceipt] = useState({});
   const [currentRecord, setCurrentRecord] = useState({});
@@ -19,13 +19,23 @@ export default function App() {
     setCurrentKey(keyval);
     const db = databaseRef(database, "invoice/" + keyval);
     onValue(db, (snapshot) => {
-      setCurrentRecord(snapshot.val());
+      if (snapshot.val()) {
+        setCurrentRecord(snapshot.val());
+      } else {
+        setCurrentRecord({});
+        setCurrentKey("");
+      }
     });
   };
 
   useEffect(() => {
     splitBill();
   }, [currentRecord]);
+
+  useEffect(() => {
+    setCurrentRecord({});
+    setCurrentKey("");
+  }, [currentUser]);
 
   const clearRecords = () => {
     const db = databaseRef(database, "invoice/" + currentKey + "/expenses");
@@ -65,6 +75,9 @@ export default function App() {
       }
       setOverallReceipt(newReceipt);
       setUniqueNames(uniqueNamesList);
+    } else {
+      setOverallReceipt({});
+      setUniqueNames([]);
     }
   };
 
@@ -77,13 +90,22 @@ export default function App() {
         <u>
           <h1>This is the HOMEPAGE.</h1>
         </u>
-        Current username: <input type="text" value={currentUser} onChange={({target}) => setCurrentUser(target.value)} placeholder="current username" />
+        Current username:{" "}
+        <input
+          type="text"
+          value={currentUser}
+          onChange={({ target }) => setCurrentUser(target.value)}
+          placeholder="current username"
+        />
         <p>
           It has a dashboard, a section for invoices, and sidebar with a{" "}
           <button>Split-A-Bill</button> link.
         </p>
         <h2>Invoices section</h2>
-        <InvoiceRetrieve setCurrentRecordListener={setCurrentRecordListener} />
+        <InvoiceRetrieve
+          currentUser={currentUser}
+          setCurrentRecordListener={setCurrentRecordListener}
+        />
       </div>
       <hr />
       <div>
@@ -99,7 +121,7 @@ export default function App() {
 
       <div className="green-container">
         <center>
-          <InvoiceForm />
+          <InvoiceForm currentUser={currentUser} />
         </center>
       </div>
       <hr />
@@ -137,15 +159,18 @@ export default function App() {
       </div>
 
       <div className="green-container">
-        <center>
-          <h4>2. Add item</h4>
-        </center>
-        <ExpenseForm
-          keyval={currentKey}
-          fullNameList={currentRecord.group ? currentRecord.group : ""}
-        />
-        <br />
-
+        {currentRecord.author === currentUser && (
+          <div>
+            <center>
+              <h4>2. Add item</h4>
+            </center>
+            <ExpenseForm
+              keyval={currentKey}
+              fullNameList={currentRecord.group ? currentRecord.group : ""}
+            />
+            <br />
+          </div>
+        )}
         <center>
           <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
           <br />
@@ -157,10 +182,11 @@ export default function App() {
                   {...currentRecord.expenses[entry]}
                   invoicekey={currentKey}
                   expensekey={entry}
+                  deleterights={currentRecord.author === currentUser}
                 />
               ))}
           </div>
-          {currentRecord.expenses && (
+          {currentRecord.author === currentUser && currentRecord.expenses && (
             <button onClick={clearRecords}>Clear all</button>
           )}
         </center>
