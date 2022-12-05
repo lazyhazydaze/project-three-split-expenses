@@ -9,9 +9,23 @@ import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState("myself");
-  const [uniqueNames, setUniqueNames] = useState([]);
-  const [overallReceipt, setOverallReceipt] = useState({});
+  // When user logs in, currentUser state is set with username and email.
+  // For now, input fields with handleChange function is used as a placeholder.
+  // When integrate with Firebase auth, can retrieve from Auth database and set it to currentUser
+  const [currentUser, setCurrentUser] = useState({
+    username: "Hazelle",
+    email: "hazelle@gmail.com",
+  });
+
+  // placeholder handleChange function before integration with auth form
+
+  const handleChange = ({ target }) => {
+    const { name, value } = target;
+    setCurrentUser((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  // currentRecord state is an object, refers to the invoice, which houses author, date, name of the invoice, and group of selected friends.
+
   const [currentRecord, setCurrentRecord] = useState({});
   const [currentKey, setCurrentKey] = useState("");
 
@@ -42,27 +56,26 @@ export default function App() {
     remove(db);
   };
 
+  const [overallReceipt, setOverallReceipt] = useState({});
+
   const splitBill = () => {
     if ("expenses" in currentRecord) {
-      let spenderList = [];
-      for (const [key, value] of Object.entries(currentRecord.expenses)) {
-        spenderList = spenderList.concat(value.splitBy);
-      }
-
-      let uniqueNamesList = [...new Set(spenderList)];
-
       let newReceipt = {};
-      for (let k = 0; k < uniqueNamesList.length; k++) {
-        var purchase = [];
-        var cost = [];
-        var initialValue = 0;
+      for (let k = 0; k < currentRecord.group.length; k++) {
+        let purchase = [];
+        let cost = [];
+        let initialValue = 0;
         for (const [key, value] of Object.entries(currentRecord.expenses)) {
-          if (value["splitBy"].includes(uniqueNamesList[k])) {
-            purchase.push(value["item"]);
-            cost.push(value["amount"] / value["splitBy"].length);
-          }
+          const splitByArray = value.splitBy;
+          splitByArray.forEach((element) => {
+            if (element.value === currentRecord.group[k].value) {
+              purchase.push(value.item);
+              cost.push(value.amount / value.splitBy.length);
+            }
+          });
 
           var record = {
+            username: currentRecord.group[k].label,
             purchases: purchase,
             costprice: cost,
             total: cost.reduce(
@@ -71,18 +84,14 @@ export default function App() {
             ),
           };
         }
-        newReceipt[uniqueNamesList[k]] = record;
+        console.log("newReceipt", newReceipt);
+        newReceipt[currentRecord.group[k].value] = record;
       }
       setOverallReceipt(newReceipt);
-      setUniqueNames(uniqueNamesList);
     } else {
       setOverallReceipt({});
-      setUniqueNames([]);
     }
   };
-
-  let sortUniqueNames = [...uniqueNames].sort();
-  let copyOverallReceipt = overallReceipt;
 
   return (
     <div>
@@ -93,8 +102,17 @@ export default function App() {
         Current username:{" "}
         <input
           type="text"
-          value={currentUser}
-          onChange={({ target }) => setCurrentUser(target.value)}
+          value={currentUser.username || ""}
+          name="username"
+          onChange={handleChange}
+          placeholder="current username"
+        />
+        Current email:
+        <input
+          type="text"
+          value={currentUser.email || ""}
+          name="email"
+          onChange={handleChange}
           placeholder="current username"
         />
         <p>
@@ -142,7 +160,8 @@ export default function App() {
         <center>
           <h2>{currentRecord.invoice}</h2>
           <h3>
-            📅 {currentRecord.date} || ✍ {currentRecord.author}{" "}
+            📅 {currentRecord.date} || ✍{" "}
+            {currentRecord.author && currentRecord.author.username}{" "}
           </h3>
           <br />
           <h4>
@@ -150,7 +169,7 @@ export default function App() {
           </h4>
           <div className="flex-grouplist">
             {currentRecord.group &&
-              currentRecord.group.map((k, i) => <div>{k}</div>)}
+              currentRecord.group.map((k, i) => <div>{k.label}</div>)}
           </div>
         </center>
         <center>
@@ -159,22 +178,24 @@ export default function App() {
       </div>
 
       <div className="green-container">
-        {currentRecord.author === currentUser && (
-          <div>
-            <center>
-              <h4>2. Add item</h4>
-            </center>
-            <ExpenseForm
-              keyval={currentKey}
-              fullNameList={currentRecord.group ? currentRecord.group : ""}
-            />
-            <br />
-          </div>
-        )}
+        {currentRecord.author &&
+          currentRecord.author.email === currentUser.email && (
+            <div>
+              <center>
+                <h4>2. Add item</h4>
+              </center>
+              <ExpenseForm
+                keyval={currentKey}
+                fullNameList={currentRecord.group ? currentRecord.group : []}
+              />
+              <br />
+            </div>
+          )}
         <center>
-          <h2 className="bangers">📜RECORDS OF EXPENSES📜</h2>
+          <h2>📜RECORDS OF EXPENSES📜</h2>
           <br />
-          {console.log("line 151", currentRecord.expenses)}
+          {console.log("line 194", currentRecord)}
+          {console.log("line 195", currentRecord.expenses)}
           <div className="row-flex">
             {currentRecord.expenses &&
               Object.keys(currentRecord.expenses).map((entry) => (
@@ -182,13 +203,18 @@ export default function App() {
                   {...currentRecord.expenses[entry]}
                   invoicekey={currentKey}
                   expensekey={entry}
-                  deleterights={currentRecord.author === currentUser}
+                  deleterights={
+                    currentRecord.author.email === currentUser.email
+                  }
                 />
               ))}
           </div>
-          {currentRecord.author === currentUser && currentRecord.expenses && (
-            <button onClick={clearRecords}>Clear all</button>
-          )}
+
+          {currentRecord &&
+            currentRecord.expenses &&
+            currentRecord.author.email === currentUser.email && (
+              <button onClick={clearRecords}>Clear all</button>
+            )}
         </center>
       </div>
       <div className="green-container">
@@ -196,9 +222,16 @@ export default function App() {
           <h4>3. final split bill</h4>
         </center>
         <div className="flex-receipt">
-          {sortUniqueNames.map((name) => (
-            <ReceiptDisplay name={name} receipt={copyOverallReceipt[name]} />
-          ))}
+          {currentRecord.group &&
+            currentRecord.group.map(
+              (name) =>
+                overallReceipt[name.value] && (
+                  <ReceiptDisplay
+                    name={name}
+                    receipt={overallReceipt[name.value]}
+                  />
+                )
+            )}
         </div>
       </div>
     </div>

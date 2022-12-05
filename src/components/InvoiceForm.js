@@ -1,23 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { ref as databaseRef, push, set } from "firebase/database";
 import { database } from "../firebase";
-import GroupForm from "./GroupForm";
+
+// Placeholder contactlist for selection purposes
+import { contactList } from "../data";
+
+// Libraries for styling
+import Select from "react-select";
+import dayjs from "dayjs";
+import TextField from "@mui/material/TextField";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 
 export default function InvoiceForm(props) {
+  //props.currentUser properties passed from currentUser state in App.js
+  //author is an object, same as currentUser {username: "", email:""}
+
   const [invoice, setInvoice] = useState("");
-  const [author, setAuthor] = useState("");
-  const [date, setDate] = useState("");
-  const [group, setGroup] = useState([props.currentUser]);
+  const [author, setAuthor] = useState(props.currentUser);
+  const [date, setDate] = useState(dayjs());
 
-  const addName = (name) => {
-    const newGroup = [...group, name];
-    setGroup(newGroup);
-  };
+  // the list of selectedFriends will always include the author
+  const [selectedFriends, setSelectedFriends] = useState([
+    {
+      value: props.currentUser.email,
+      label: props.currentUser.username,
+      isFixed: true,
+    },
+  ]);
 
-  const deleteName = (name) => {
-    const filteredGroup = group.filter((x) => x !== name);
-    setGroup(filteredGroup);
-  };
+  // add the currentUser to the top of the contact list and set it as a default fixed option.
+  let combinedContactList = [
+    {
+      value: props.currentUser.email,
+      label: props.currentUser.username,
+      isFixed: true,
+    },
+    ...contactList,
+  ];
+
+  // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,41 +48,71 @@ export default function InvoiceForm(props) {
     set(dbRef, {
       invoice,
       author,
-      date,
-      group,
+      date: date.format("DD/MM/YYYY"),
+      group: selectedFriends,
     });
     setInvoice("");
-    setDate("");
-    setGroup([props.currentUser]);
+    setDate(dayjs());
+    setSelectedFriends([
+      {
+        value: props.currentUser.email,
+        label: props.currentUser.username,
+        isFixed: true,
+      },
+    ]);
   };
 
+  // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {
     setAuthor(props.currentUser);
-    const newGroup = [...group];
-    newGroup[0] = props.currentUser;
-    setGroup(newGroup);
+    const newGroup = [...selectedFriends];
+    newGroup[0] = {
+      value: props.currentUser.email,
+      label: props.currentUser.username,
+      isFixed: true,
+    };
+    setSelectedFriends(newGroup);
   }, [props.currentUser]);
-
-  let copyGroup = [...group];
 
   return (
     <div>
       <center>
-        <h4>1A. Who splitting with you</h4>
-        <GroupForm nameList={group} addName={addName} />
+        <h4>1A. Who is splitting with you</h4>
+        <div className="dropdown-container">
+          <Select
+            options={combinedContactList}
+            placeholder="Select Name"
+            value={selectedFriends}
+            defaultValue={combinedContactList[0]}
+            onChange={setSelectedFriends}
+            isSearchable={true}
+            isMulti
+            styles={{
+              multiValue: (base, state) => {
+                return state.data.isFixed
+                  ? { ...base, backgroundColor: "gray" }
+                  : base;
+              },
+              multiValueLabel: (base, state) => {
+                return state.data.isFixed
+                  ? {
+                      ...base,
+                      fontWeight: "bold",
+                      color: "white",
+                      paddingRight: 6,
+                    }
+                  : base;
+              },
+              multiValueRemove: (base, state) => {
+                return state.data.isFixed ? { ...base, display: "none" } : base;
+              },
+            }}
+          />
+        </div>
         <br />
       </center>
-      <hr />
 
       <h4>1B. Name this invoice</h4>
-      <h4>{group.length} members:</h4>
-      <div className="flex-grouplist">
-        {copyGroup.map((k, i) => (
-          <div>
-            {k} {i !== 0 && <button onClick={() => deleteName(k)}>x</button>}
-          </div>
-        ))}
-      </div>
       <br />
       <form onSubmit={handleSubmit}>
         <input
@@ -70,14 +123,15 @@ export default function InvoiceForm(props) {
           onChange={({ target }) => setInvoice(target.value)}
           required
         />
-        <input
-          type="text"
-          name="date"
-          value={date}
-          placeholder="Enter Date"
-          onChange={({ target }) => setDate(target.value)}
-          required
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DesktopDatePicker
+            label="Date"
+            inputFormat="MM/DD/YYYY"
+            value={date}
+            onChange={(newValue) => setDate(newValue)}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
         <input type="submit" value="Next" />
       </form>
     </div>

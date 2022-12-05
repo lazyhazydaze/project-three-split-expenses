@@ -4,6 +4,10 @@ import { database } from "../firebase";
 import "./DisplayExpense.css";
 
 export default function InvoiceDisplay(props) {
+  //idvalue properties is passed from InvoiceRetrieve.js, which is the key of the Invoice in db.
+  //clickMe properties
+  //deleterights properties
+  //expensekey properties
   const deleteInvoice = (e) => {
     e.preventDefault();
     const db = databaseRef(database, "invoice/" + props.idvalue);
@@ -14,7 +18,7 @@ export default function InvoiceDisplay(props) {
       <div className="card">
         <h3>{props.invoice}</h3>
         <p>{props.date}</p>
-        <p>By: {props.author}</p>
+        <p>By: {props.author.username}</p>
         {props.deleterights && (
           <button value={props.expensekey} onClick={deleteInvoice}>
             ✖
