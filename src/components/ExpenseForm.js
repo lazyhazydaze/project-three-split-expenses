@@ -7,28 +7,9 @@ export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
   const [amount, setAmount] = useState("");
   const [splitBy, setSplitBy] = useState([]);
-  // const [start, setStart] = useState(true);
-
-  // const handleChangeCheckBox = (e) => {
-  //   const { checked, value } = e.target;
-
-  //   if (checked) {
-  //     const newSpenderList = [...splitBy, value];
-  //     setSplitBy(newSpenderList);
-  //     setStart(false);
-  //   } else {
-  //     setSplitBy(splitBy.filter((e) => e !== value));
-  //     setStart(false);
-  //   }
-  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (splitBy.length < 1) {
-      alert("Please select spender field");
-      return;
-    }
 
     const record = {
       item: item,
@@ -42,7 +23,6 @@ export default function ExpenseForm(props) {
     setItem("");
     setAmount("");
     setSplitBy([]);
-    // setStart(true);
   };
 
   let copyOfNameList = [...props.fullNameList];
@@ -70,46 +50,16 @@ export default function ExpenseForm(props) {
         />
         <br />
         <br />
-        <b>
-          <span style={{ color: "#ffc312" }}>
-            <u>Split amongst:</u>
-          </span>
-        </b>
-        <br />
-        <br />
         <div className="dropdown-container">
           <Select
             options={copyOfNameList}
-            placeholder="Select Name"
+            placeholder="Split amongst?"
             value={splitBy}
             onChange={setSplitBy}
             isSearchable={true}
             isMulti
           />
         </div>
-        {/* <div className="flex-spender">
-          {copyOfNameList.map((humans, i) => (
-            <div key={i}>
-              {start ? (
-                <input
-                  type="checkbox"
-                  name={humans.value}
-                  value={humans.label}
-                  checked={false}
-                  onChange={(e) => handleChangeCheckBox(e)}
-                />
-              ) : (
-                <input
-                  type="checkbox"
-                  name={humans.value}
-                  value={humans.label}
-                  onChange={(e) => handleChangeCheckBox(e)}
-                />
-              )}
-              {humans.label}
-            </div>
-          ))}{" "}
-        </div> */}
         <br />
         <br />
         <center>

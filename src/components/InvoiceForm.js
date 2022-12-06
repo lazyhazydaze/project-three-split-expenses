@@ -77,7 +77,8 @@ export default function InvoiceForm(props) {
   return (
     <div>
       <center>
-        <h4>1A. Who is splitting with you</h4>
+        <h2>1. Who's Splitting With You ---- 2. Name Invoice</h2>
+
         <div className="dropdown-container">
           <Select
             options={combinedContactList}
@@ -112,8 +113,6 @@ export default function InvoiceForm(props) {
         <br />
       </center>
 
-      <h4>1B. Name this invoice</h4>
-      <br />
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -132,7 +131,10 @@ export default function InvoiceForm(props) {
             renderInput={(params) => <TextField {...params} />}
           />
         </LocalizationProvider>
-        <input type="submit" value="Next" />
+        <br />
+        <center>
+          <input type="submit" value="Next" />
+        </center>
       </form>
     </div>
   );

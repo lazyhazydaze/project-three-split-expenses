@@ -1,12 +1,13 @@
+import { Routes, Route } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { ref as databaseRef, onValue, remove } from "firebase/database";
+import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "./firebase";
 import "./App.css";
-import DisplayExpense from "./components/DisplayExpense";
-import ExpenseForm from "./components/ExpenseForm";
-import ReceiptDisplay from "./components/ReceiptDisplay";
+
+import Homepage from "./components/Homepage";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
+import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
 
 export default function App() {
   // When user logs in, currentUser state is set with username and email.
@@ -51,11 +52,6 @@ export default function App() {
     setCurrentKey("");
   }, [currentUser]);
 
-  const clearRecords = () => {
-    const db = databaseRef(database, "invoice/" + currentKey + "/expenses");
-    remove(db);
-  };
-
   const [overallReceipt, setOverallReceipt] = useState({});
 
   const splitBill = () => {
@@ -96,144 +92,69 @@ export default function App() {
   return (
     <div>
       <div>
-        <u>
-          <h1>This is the HOMEPAGE.</h1>
-        </u>
-        Current username:{" "}
-        <input
-          type="text"
-          value={currentUser.username || ""}
-          name="username"
-          onChange={handleChange}
-          placeholder="current username"
-        />
-        Current email:
-        <input
-          type="text"
-          value={currentUser.email || ""}
-          name="email"
-          onChange={handleChange}
-          placeholder="current username"
-        />
-        <p>
-          It has a dashboard, a section for invoices, and sidebar with a{" "}
-          <button>Split-A-Bill</button> link.
-        </p>
-        <h2>Invoices section</h2>
-        <InvoiceRetrieve
-          currentUser={currentUser}
-          setCurrentRecordListener={setCurrentRecordListener}
-        />
-      </div>
-      <hr />
-      <div>
-        <u>
-          <h1>
-            On clicking <button>Split-A-Bill</button> from Homepage sidemenu{" "}
-          </h1>
-        </u>
         <center>
-          <h2>Who's splitting with you || Name your invoice</h2>
+          Current usernamep placeholder:{" "}
+          <input
+            type="text"
+            value={currentUser.username || ""}
+            name="username"
+            onChange={handleChange}
+            placeholder="current username"
+          />
+          Current email placeholder:
+          <input
+            type="text"
+            value={currentUser.email || ""}
+            name="email"
+            onChange={handleChange}
+            placeholder="current username"
+          />
         </center>
       </div>
-
-      <div className="green-container">
-        <center>
-          <InvoiceForm currentUser={currentUser} />
-        </center>
-      </div>
-      <hr />
+      <br />
 
       <div>
-        <u>
-          <h1>
-            On clicking <button>Next</button>, will direct back to HOMEPAGE, and
-            invoices section is updated with a record that is clickable.
-          </h1>
-        </u>
-      </div>
-      <hr />
-      <div>
-        <u>
-          <h1>On clicking the record under the Invoice section</h1>
-        </u>
-        <center>
-          <h2>{currentRecord.invoice}</h2>
-          <h3>
-            📅 {currentRecord.date} || ✍{" "}
-            {currentRecord.author && currentRecord.author.username}{" "}
-          </h3>
-          <br />
-          <h4>
-            {currentRecord.group ? currentRecord.group.length : 0} members:
-          </h4>
-          <div className="flex-grouplist">
-            {currentRecord.group &&
-              currentRecord.group.map((k, i) => <div>{k.label}</div>)}
-          </div>
-        </center>
-        <center>
-          <h2>Expenses Records || Split Bill</h2>
-        </center>
-      </div>
-
-      <div className="green-container">
-        {currentRecord.author &&
-          currentRecord.author.email === currentUser.email && (
-            <div>
-              <center>
-                <h4>2. Add item</h4>
-              </center>
-              <ExpenseForm
-                keyval={currentKey}
-                fullNameList={currentRecord.group ? currentRecord.group : []}
-              />
-              <br />
-            </div>
-          )}
-        <center>
-          <h2>📜RECORDS OF EXPENSES📜</h2>
-          <br />
-          {console.log("line 194", currentRecord)}
-          {console.log("line 195", currentRecord.expenses)}
-          <div className="row-flex">
-            {currentRecord.expenses &&
-              Object.keys(currentRecord.expenses).map((entry) => (
-                <DisplayExpense
-                  {...currentRecord.expenses[entry]}
-                  invoicekey={currentKey}
-                  expensekey={entry}
-                  deleterights={
-                    currentRecord.author.email === currentUser.email
-                  }
+        <Routes>
+          <Route path="/" element={<Homepage />}>
+            <Route
+              path="splitabill"
+              element={<InvoiceForm currentUser={currentUser} />}
+            />
+            <Route
+              path="invoices"
+              element={
+                <InvoiceRetrieve
+                  currentUser={currentUser}
+                  setCurrentRecordListener={setCurrentRecordListener}
                 />
-              ))}
-          </div>
-
-          {currentRecord &&
-            currentRecord.expenses &&
-            currentRecord.author.email === currentUser.email && (
-              <button onClick={clearRecords}>Clear all</button>
-            )}
-        </center>
-      </div>
-      <div className="green-container">
-        <center>
-          <h4>3. final split bill</h4>
-        </center>
-        <div className="flex-receipt">
-          {currentRecord.group &&
-            currentRecord.group.map(
-              (name) =>
-                overallReceipt[name.value] && (
-                  <ReceiptDisplay
-                    name={name}
-                    receipt={overallReceipt[name.value]}
+              }
+            >
+              <Route
+                path=":invoiceId"
+                element={
+                  <DetailedInvoiceDisplay
+                    currentRecord={currentRecord}
+                    currentUser={currentUser}
+                    currentKey={currentKey}
+                    overallReceipt={overallReceipt}
                   />
-                )
-            )}
-        </div>
+                }
+              />
+            </Route>
+            <Route
+              path="*"
+              element={
+                <main style={{ padding: "1rem" }}>
+                  <p>There's nothing here!</p>
+                </main>
+              }
+            />
+          </Route>
+        </Routes>
       </div>
+
+      {/* {console.log("line 194", currentRecord)}
+      {console.log("line 195", currentRecord.expenses)} */}
     </div>
   );
 }
