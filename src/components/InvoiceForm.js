@@ -13,6 +13,17 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 
+import Box from "@mui/material/Box";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+
+const steps = ["Add Group", "Name Your Invoice"];
+
+const captions = ["Who is splitting with you?", "Add a name and date"];
+
 export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
   //author is an object, same as currentUser {username: "", email:""}
@@ -40,28 +51,6 @@ export default function InvoiceForm(props) {
     ...contactList,
   ];
 
-  // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const dbRef = push(databaseRef(database, "invoice"));
-    set(dbRef, {
-      invoice,
-      author,
-      date: date.format("DD/MM/YYYY"),
-      group: selectedFriends,
-    });
-    setInvoice("");
-    setDate(dayjs());
-    setSelectedFriends([
-      {
-        value: props.currentUser.email,
-        label: props.currentUser.username,
-        isFixed: true,
-      },
-    ]);
-  };
-
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {
     setAuthor(props.currentUser);
@@ -74,68 +63,145 @@ export default function InvoiceForm(props) {
     setSelectedFriends(newGroup);
   }, [props.currentUser]);
 
+  const [activeStep, setActiveStep] = useState(0);
+
+  // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
+  const handleNext = () => {
+    if (activeStep === 1) {
+      const dbRef = push(databaseRef(database, "invoice"));
+      set(dbRef, {
+        invoice,
+        author,
+        date: date.format("DD/MM/YYYY"),
+        group: selectedFriends,
+      });
+      setInvoice("");
+      setDate(dayjs());
+      setSelectedFriends([
+        {
+          value: props.currentUser.email,
+          label: props.currentUser.username,
+          isFixed: true,
+        },
+      ]);
+    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
+  const step1 = (
+    <div className="dropdown-container">
+      <Select
+        options={combinedContactList}
+        placeholder="Select Name"
+        value={selectedFriends}
+        defaultValue={combinedContactList[0]}
+        onChange={setSelectedFriends}
+        isSearchable={true}
+        isMulti
+        styles={{
+          multiValue: (base, state) => {
+            return state.data.isFixed
+              ? { ...base, backgroundColor: "gray" }
+              : base;
+          },
+          multiValueLabel: (base, state) => {
+            return state.data.isFixed
+              ? {
+                  ...base,
+                  fontWeight: "bold",
+                  color: "white",
+                  paddingRight: 6,
+                }
+              : base;
+          },
+          multiValueRemove: (base, state) => {
+            return state.data.isFixed ? { ...base, display: "none" } : base;
+          },
+        }}
+      />
+    </div>
+  );
+
+  const step2 = (
+    <span>
+      <input
+        type="text"
+        name="invoice"
+        value={invoice}
+        placeholder="Enter Invoice Name"
+        onChange={({ target }) => setInvoice(target.value)}
+        required
+      />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DesktopDatePicker
+          label="Date"
+          inputFormat="MM/DD/YYYY"
+          value={date}
+          onChange={(newValue) => setDate(newValue)}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </LocalizationProvider>
+    </span>
+  );
+
+  const stepForm = [step1, step2];
+
   return (
     <div>
-      <center>
-        <h2>1. Who's Splitting With You ---- 2. Name Invoice</h2>
+      <Box sx={{ width: "100%" }}>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label, index) => {
+            const stepProps = {};
+            const labelProps = {};
 
-        <div className="dropdown-container">
-          <Select
-            options={combinedContactList}
-            placeholder="Select Name"
-            value={selectedFriends}
-            defaultValue={combinedContactList[0]}
-            onChange={setSelectedFriends}
-            isSearchable={true}
-            isMulti
-            styles={{
-              multiValue: (base, state) => {
-                return state.data.isFixed
-                  ? { ...base, backgroundColor: "gray" }
-                  : base;
-              },
-              multiValueLabel: (base, state) => {
-                return state.data.isFixed
-                  ? {
-                      ...base,
-                      fontWeight: "bold",
-                      color: "white",
-                      paddingRight: 6,
-                    }
-                  : base;
-              },
-              multiValueRemove: (base, state) => {
-                return state.data.isFixed ? { ...base, display: "none" } : base;
-              },
-            }}
-          />
-        </div>
-        <br />
-      </center>
+            return (
+              <Step key={label} {...stepProps}>
+                <StepLabel {...labelProps}>{label}</StepLabel>
+              </Step>
+            );
+          })}
+        </Stepper>
+        {activeStep === steps.length ? (
+          <React.Fragment>
+            <Typography sx={{ mt: 2, mb: 1 }}>
+              Invoice created! Go to Homepage to edit the record.
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+              <Box sx={{ flex: "1 1 auto" }} />
+              <Button onClick={handleReset}>Create another</Button>
+            </Box>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <Typography sx={{ mt: 2, mb: 1 }}>
+              {captions[activeStep]} <br /> {stepForm[activeStep]}
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+              <Button
+                color="inherit"
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                sx={{ mr: 1 }}
+              >
+                Back
+              </Button>
+              <Box sx={{ flex: "1 1 auto" }} />
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="invoice"
-          value={invoice}
-          placeholder="Enter Invoice Name"
-          onChange={({ target }) => setInvoice(target.value)}
-          required
-        />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DesktopDatePicker
-            label="Date"
-            inputFormat="MM/DD/YYYY"
-            value={date}
-            onChange={(newValue) => setDate(newValue)}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </LocalizationProvider>
-        <br />
-        <center>
-          <input type="submit" value="Next" />
-        </center>
-      </form>
+              <Button onClick={handleNext}>
+                {activeStep === steps.length - 1 ? "Submit" : "Next"}
+              </Button>
+            </Box>
+          </React.Fragment>
+        )}
+      </Box>
     </div>
   );
 }
