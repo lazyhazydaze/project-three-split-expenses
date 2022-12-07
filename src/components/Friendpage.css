@@ -1,0 +1,45 @@
+.close{
+    float: right;
+  }
+
+  .close:hover{
+    cursor: pointer;
+    color: red;
+  }
+
+
+.requests{
+    background-color: aliceblue;
+    border-radius: 25px;
+    padding: 5px;
+}
+
+.requests:hover{
+  cursor: pointer;
+  background-color: rgb(197, 198, 199);
+}
+
+.acceptfriend {
+  display: none;
+  position: absolute;
+  top: 0%;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.50);
+}
+
+.acceptfriend.display {
+  display: block;
+}
+
+.acceptfriend-content{
+  background-color: white;
+    position: relative;
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    padding: 20px;
+    border-radius: 5px;
+    border: 2px solid black;
+}
