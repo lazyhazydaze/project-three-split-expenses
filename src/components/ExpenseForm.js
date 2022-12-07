@@ -1,43 +1,28 @@
 import React, { useState } from "react";
+import { ref as databaseRef, push, set } from "firebase/database";
+import { database } from "../firebase";
+import Select from "react-select";
 
 export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
   const [amount, setAmount] = useState("");
-  const [spenders, setSpenders] = useState([]);
-  const [start, setStart] = useState(true);
-
-  const handleChangeCheckBox = (e) => {
-    const { checked, value } = e.target;
-
-    if (checked) {
-      const newSpenderList = [...spenders, value];
-      setSpenders(newSpenderList);
-      setStart(false);
-    } else {
-      setSpenders(spenders.filter((e) => e !== value));
-      setStart(false);
-    }
-  };
+  const [splitBy, setSplitBy] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (spenders.length < 1) {
-      alert("Please select spender field");
-      return;
-    }
-
     const record = {
       item: item,
       amount: amount,
-      spenders: spenders,
+      splitBy: splitBy,
     };
-
-    props.action(record);
+    const dbRef = push(
+      databaseRef(database, "invoice/" + props.keyval + "/expenses")
+    );
+    set(dbRef, record);
     setItem("");
     setAmount("");
-    setSpenders([]);
-    setStart(true);
+    setSplitBy([]);
   };
 
   let copyOfNameList = [...props.fullNameList];
@@ -46,7 +31,6 @@ export default function ExpenseForm(props) {
     <div>
       <form onSubmit={handleSubmit}>
         <input
-          className="input-field"
           type="text"
           name="item"
           maxLength={24}
@@ -56,7 +40,6 @@ export default function ExpenseForm(props) {
           placeholder="Enter Item Name"
         />
         <input
-          className="input-field"
           type="text"
           name="amount"
           value={amount}
@@ -67,40 +50,20 @@ export default function ExpenseForm(props) {
         />
         <br />
         <br />
-        <b>
-          <span style={{ color: "#ffc312" }}>
-            <u>Split amongst:</u>
-          </span>
-        </b>
-        <br />
-        <br />
-        <div className="flex-spender">
-          {copyOfNameList.map((name, i) => (
-            <div key={i}>
-              {start ? (
-                <input
-                  type="checkbox"
-                  name={name}
-                  value={name}
-                  checked={false}
-                  onChange={(e) => handleChangeCheckBox(e)}
-                />
-              ) : (
-                <input
-                  type="checkbox"
-                  name={name}
-                  value={name}
-                  onChange={(e) => handleChangeCheckBox(e)}
-                />
-              )}
-              {name}
-            </div>
-          ))}{" "}
+        <div className="dropdown-container">
+          <Select
+            options={copyOfNameList}
+            placeholder="Split amongst?"
+            value={splitBy}
+            onChange={setSplitBy}
+            isSearchable={true}
+            isMulti
+          />
         </div>
         <br />
         <br />
         <center>
-          <input className="white-btn" type="submit" value="SUBMIT" />
+          <input type="submit" value="add record" />
         </center>
       </form>
     </div>
