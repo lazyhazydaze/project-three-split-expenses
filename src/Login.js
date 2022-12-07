@@ -7,11 +7,11 @@ export const Login = () => {
 
 
     useEffect(()=>{
-        onAuthStateChanged(auth,(user)=>{
-            if(user){
-                navigate("/Homepage")
-            }
-        })
+        const user = auth.currentUser
+        if(user && user.displayName != null){
+            console.log("auto routed")
+            navigate("/Homepage")
+        }
     },[])// tests
 
     const [email, setEmail] = useState("")
@@ -24,6 +24,7 @@ export const Login = () => {
         //import firebase first
         signInWithEmailAndPassword(auth,email,password)
             .then((userCredential)=>{
+                console.log("Login page navigated")
                 navigate("/Homepage")
             })
             .catch((error)=>{

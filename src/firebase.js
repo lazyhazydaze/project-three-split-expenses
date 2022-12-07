@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref } from "firebase/database";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
@@ -15,13 +15,10 @@ import { getAuth } from "firebase/auth";
 //   messagingSenderId: "SENDER_ID",
 //   appId: "APP_ID",
 // };
-
 const firebaseConfig = {
-  // apiKey: process.env.REACT_APP_API_KEY,
-  apiKey: "AIzaSyB76poUUSjwXX_8Y3dVlH5I6V07i93gWtQ",
+  apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-  // databaseURL: process.env.REACT_APP_DATABASE_URL,
-  databaseURL:"https://spend-money-thing-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: process.env.REACT_APP_DATABASE_URL,
   projectId: process.env.REACT_APP_PROJECT_ID,
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGE_SENDER,
@@ -33,6 +30,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 // Get a reference to the database service and export the reference for other modules
 export const database = getDatabase(firebaseApp);
+export const dbRef = ref(getDatabase())
 
 export const storage = getStorage(firebaseApp);
 

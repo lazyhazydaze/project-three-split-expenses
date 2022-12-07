@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
-import { auth } from './firebase'
+import { auth, database } from './firebase'
 import './Register.css'
 import { Link, useNavigate } from 'react-router-dom'
-import { ref, set } from 'firebase/database'
 import { updateProfile } from 'firebase/auth'
-import { database } from './firebase'
+import { ref, set } from 'firebase/database'
 
 export const Register = () => {
 
@@ -23,15 +22,15 @@ export const Register = () => {
     
     const handleRegister =(e)=>{
         e.preventDefault();
-        // if(email=="")return(console.log("fuckyou"));
         
 
         createUserWithEmailAndPassword(auth,email,password)
             .then((userCredentials)=>{
                 // userCredentials.displayName = username
                 //sign in is automatic after registeration
+                // console.log("entry into createuser");
                 setDisplay1("hideDisplay");
-                setDisplay2("showDisplay")
+                setDisplay2("showDisplay");
             })
             .catch((error)=>{
                 const errorCode = error.code;
@@ -44,16 +43,30 @@ export const Register = () => {
 
     const createUsername = (e) =>{
         e.preventDefault()
-        onAuthStateChanged(auth,(user)=>{   
-            updateProfile(user,{
-                displayName: username
-            }).then(()=>{
-                navigate("/Homepage")
-                setUsername("")
-            })
-        })
+        console.log("createusernameran")
 
+        const user = auth.currentUser
+
+     
+        set(ref(database, "users/" + user.uid),{
+            username: username,
+            email: email,
+            profilePicture : "",
+            currentFriends: [], //doesnt add probably cause its an empty array
+        })
+        
+        updateProfile(user, {
+            displayName: username
+        })
+        .then(()=>{
+            setUsername("")
+            setEmail("")
+            setPassword("")
+            navigate("/Login")
+        })
     }
+
+
 
   return (
     <>
