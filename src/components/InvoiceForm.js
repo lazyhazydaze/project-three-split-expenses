@@ -53,7 +53,12 @@ export default function InvoiceForm(props) {
 
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {
-    setAuthor(props.currentUser);
+    console.log("props",props.currentUser)
+    // setAuthor(props.currentUser);
+    setAuthor({
+      username: props.currentUser.displayName,
+      email: props.currentUser.email,
+    })
     const newGroup = [...selectedFriends];
     newGroup[0] = {
       value: props.currentUser.email,
@@ -67,7 +72,17 @@ export default function InvoiceForm(props) {
 
   // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
   const handleNext = () => {
+    console.log("step",activeStep)
     if (activeStep === 1) {
+
+      console.log("author",author)
+      set(databaseRef(database,"invoice/"),{
+        invoice,
+        author, //this shit is breaking it
+        date: date.format("DD/MM/YYYY"),
+        group: selectedFriends,
+      })
+      console.log("woopdedoop")
       const dbRef = push(databaseRef(database, "invoice"));
       set(dbRef, {
         invoice,
@@ -75,6 +90,7 @@ export default function InvoiceForm(props) {
         date: date.format("DD/MM/YYYY"),
         group: selectedFriends,
       });
+      // console.log("past") stuck here
       setInvoice("");
       setDate(dayjs());
       setSelectedFriends([

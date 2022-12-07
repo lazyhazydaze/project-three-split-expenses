@@ -90,13 +90,11 @@ export const Friendpage = () => {
                 //     })
                 // })
     }
-    const pingpongball = false
 
     useEffect(()=>{
         const unsubscribe = onAuthStateChanged(auth,(user)=>{
             if(user){
                 setUser(auth.currentUser)
-                pingpongball = true
             }   
             else {
                 navigate("/Login")
