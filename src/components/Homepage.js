@@ -16,7 +16,7 @@ export default function Homepage(props) {
           <br />
           <Link to="/invoices">
             <button>View Invoices</button>
-          </Link>
+          </Link >
           <button>View Contact List</button>
           <br />
           <Link to="/">Return back to Homepage</Link>

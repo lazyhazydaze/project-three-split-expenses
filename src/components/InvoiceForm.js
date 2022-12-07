@@ -26,7 +26,7 @@ const captions = ["Who is splitting with you?", "Add a name and date"];
 
 export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
-  //author is an object, same as currentUser {username: "", email:""}
+  //author is an object, same as currentUser {displayName: "", email:""}
 
   const [invoice, setInvoice] = useState("");
   const [author, setAuthor] = useState(props.currentUser);
@@ -36,7 +36,7 @@ export default function InvoiceForm(props) {
   const [selectedFriends, setSelectedFriends] = useState([
     {
       value: props.currentUser.email,
-      label: props.currentUser.username,
+      label: props.currentUser.displayName,
       isFixed: true,
     },
   ]);
@@ -45,7 +45,7 @@ export default function InvoiceForm(props) {
   let combinedContactList = [
     {
       value: props.currentUser.email,
-      label: props.currentUser.username,
+      label: props.currentUser.displayName,
       isFixed: true,
     },
     ...contactList,
@@ -57,7 +57,7 @@ export default function InvoiceForm(props) {
     const newGroup = [...selectedFriends];
     newGroup[0] = {
       value: props.currentUser.email,
-      label: props.currentUser.username,
+      label: props.currentUser.displayName,
       isFixed: true,
     };
     setSelectedFriends(newGroup);
@@ -80,7 +80,7 @@ export default function InvoiceForm(props) {
       setSelectedFriends([
         {
           value: props.currentUser.email,
-          label: props.currentUser.username,
+          label: props.currentUser.displayName,
           isFixed: true,
         },
       ]);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
-import { auth, database } from './firebase'
+import { auth, database } from '../firebase'
 import './Register.css'
 import { Link, useNavigate } from 'react-router-dom'
 import { updateProfile } from 'firebase/auth'

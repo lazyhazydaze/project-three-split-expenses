@@ -2,9 +2,8 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { child, get, update, ref, onValue} from 'firebase/database'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import { database, auth, dbRef } from './firebase'
+import { database, auth, dbRef } from '../firebase'
 import "./Friendpage.css"
-import { UserContext } from './RouterPage'
 
 export const Friendpage = () => {
 

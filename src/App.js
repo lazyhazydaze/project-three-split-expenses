@@ -1,22 +1,49 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "./firebase";
 import "./App.css";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "@firebase/auth";
 
 import Homepage from "./components/Homepage";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
 
+import { Login } from "./components/Login";
+import { Register } from "./components/Register";
+import { Friendpage } from "./components/Friendpage";
+
 export default function App() {
   // When user logs in, currentUser state is set with username and email.
   // For now, input fields with handleChange function is used as a placeholder.
   // When integrate with Firebase auth, can retrieve from Auth database and set it to currentUser
-  const [currentUser, setCurrentUser] = useState({
-    username: "Hazelle",
-    email: "hazelle@gmail.com",
-  });
+  const navigate = useNavigate()
+    const [currentUser,setCurrentUser] = useState("")
+    useEffect(()=>{
+        const unsubscribe = onAuthStateChanged(auth,(user)=>{
+            if(user){
+                let dontbeconfusedhazelle = auth.currentUser
+                setCurrentUser(dontbeconfusedhazelle)
+                // console.log("logged in")
+                // console.log("dashboard",user)
+            }
+            else {
+                // console.log("not logged in")
+                navigate("/Login")
+            }
+            return ()=>{
+              unsubscribe()
+            }
+        })
+    },[])//run once on render
+    
+  
+  // const [currentUser, setCurrentUser] = useState({
+  //   username: user? user.displayName : "thing",
+  //   email: user? user.email : "thing",
+  // });
 
   // placeholder handleChange function before integration with auth form
 
@@ -96,7 +123,7 @@ export default function App() {
           Current usernamep placeholder:{" "}
           <input
             type="text"
-            value={currentUser.username || ""}
+            value={currentUser.displayName || ""}
             name="username"
             onChange={handleChange}
             placeholder="current username"
@@ -113,8 +140,22 @@ export default function App() {
       </div>
       <br />
 
+
+      {/* <Route path='/Login' element={<Login/>} />
+          <Route path='/Register' element={<Register/>} />
+          
+          
+            <Route path='/' element={<Dashboard/>}>
+              <Route path='/App' element={<App/>} />
+              <Route path='/Homepage' element={<Homepage/>} />
+              <Route path='/Friendpage' element={<Friendpage/>}/>
+            </Route> */}
+
       <div>
         <Routes>
+          <Route path='Login' element={<Login/>} />
+          <Route path='Register' element={<Register/>} />
+
           <Route path="/" element={<Homepage />}>
             <Route
               path="splitabill"
@@ -141,6 +182,8 @@ export default function App() {
                 }
               />
             </Route>
+                <Route path="Add-A-Friend" element={<Friendpage/>} />
+                
             <Route
               path="*"
               element={
