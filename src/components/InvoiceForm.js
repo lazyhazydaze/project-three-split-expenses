@@ -29,7 +29,10 @@ export default function InvoiceForm(props) {
   //author is an object, same as currentUser {displayName: "", email:""}
 
   const [invoice, setInvoice] = useState("");
-  const [author, setAuthor] = useState(props.currentUser);
+  const [author, setAuthor] = useState({
+    username: props.currentUser.displayName,
+    email: props.currentUser.email,
+  });
   const [date, setDate] = useState(dayjs());
 
   // the list of selectedFriends will always include the author
@@ -53,7 +56,10 @@ export default function InvoiceForm(props) {
 
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {
-    setAuthor(props.currentUser);
+    setAuthor({
+      username: props.currentUser.displayName,
+      email: props.currentUser.email,
+    });
     const newGroup = [...selectedFriends];
     newGroup[0] = {
       value: props.currentUser.email,

@@ -14,32 +14,33 @@ import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
 import { Login } from "./components/Login";
 import { Register } from "./components/Register";
 import { Friendpage } from "./components/Friendpage";
+import { UserProfile } from "./components/UserProfile";
 
 export default function App() {
   // When user logs in, currentUser state is set with username and email.
   // For now, input fields with handleChange function is used as a placeholder.
   // When integrate with Firebase auth, can retrieve from Auth database and set it to currentUser
-  const navigate = useNavigate()
-    const [currentUser,setCurrentUser] = useState("")
-    useEffect(()=>{
-        const unsubscribe = onAuthStateChanged(auth,(user)=>{
-            if(user){
-                let dontbeconfusedhazelle = auth.currentUser
-                setCurrentUser(dontbeconfusedhazelle)
-                // console.log("logged in")
-                // console.log("dashboard",user)
-            }
-            else {
-                // console.log("not logged in")
-                navigate("/Login")
-            }
-            return ()=>{
-              unsubscribe()
-            }
-        })
-    },[])//run once on render
-    
-  
+  const [currentUser, setCurrentUser] = useState("");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        let dontbeconfusedhazelle = auth.currentUser;
+        setCurrentUser(dontbeconfusedhazelle);
+        // console.log("logged in")
+        // console.log("dashboard",user)
+      } else {
+        // console.log("not logged in")
+        navigate("/Login");
+      }
+      return () => {
+        unsubscribe();
+      };
+    });
+  }, []); //run once on render
+
   // const [currentUser, setCurrentUser] = useState({
   //   username: user? user.displayName : "thing",
   //   email: user? user.email : "thing",
@@ -47,10 +48,10 @@ export default function App() {
 
   // placeholder handleChange function before integration with auth form
 
-  const handleChange = ({ target }) => {
-    const { name, value } = target;
-    setCurrentUser((prevState) => ({ ...prevState, [name]: value }));
-  };
+  // const handleChange = ({ target }) => {
+  //   const { name, value } = target;
+  //   setCurrentUser((prevState) => ({ ...prevState, [name]: value }));
+  // };
 
   // currentRecord state is an object, refers to the invoice, which houses author, date, name of the invoice, and group of selected friends.
 
@@ -120,47 +121,37 @@ export default function App() {
     <div>
       <div>
         <center>
-          Current usernamep placeholder:{" "}
+          Current username logged in:{" "}
           <input
             type="text"
             value={currentUser.displayName || ""}
             name="username"
-            onChange={handleChange}
+            //onChange={handleChange}
             placeholder="current username"
           />
-          Current email placeholder:
+          Current email logged in:
           <input
             type="text"
             value={currentUser.email || ""}
             name="email"
-            onChange={handleChange}
+            //onChange={handleChange}
             placeholder="current username"
           />
         </center>
       </div>
       <br />
 
-
-      {/* <Route path='/Login' element={<Login/>} />
-          <Route path='/Register' element={<Register/>} />
-          
-          
-            <Route path='/' element={<Dashboard/>}>
-              <Route path='/App' element={<App/>} />
-              <Route path='/Homepage' element={<Homepage/>} />
-              <Route path='/Friendpage' element={<Friendpage/>}/>
-            </Route> */}
-
       <div>
         <Routes>
-          <Route path='Login' element={<Login/>} />
-          <Route path='Register' element={<Register/>} />
+          <Route path="Login" element={<Login />} />
+          <Route path="Register" element={<Register />} />
 
           <Route path="/" element={<Homepage />}>
             <Route
               path="splitabill"
               element={<InvoiceForm currentUser={currentUser} />}
             />
+            <Route path="friendpage" element={<Friendpage />} />
             <Route
               path="invoices"
               element={
@@ -182,8 +173,8 @@ export default function App() {
                 }
               />
             </Route>
-                <Route path="Add-A-Friend" element={<Friendpage/>} />
-                
+            <Route path="userprofile" element={<UserProfile />} />
+
             <Route
               path="*"
               element={

@@ -12,12 +12,16 @@ export default function Homepage(props) {
           <Link to="/splitabill">
             <button>Split-A-Bill</button>
           </Link>
-          <button>Add-A-Friend</button>
+          <Link to="/friendpage">
+            <button>Add/View Friends</button>
+          </Link>
           <br />
           <Link to="/invoices">
             <button>View Invoices</button>
-          </Link >
-          <button>View Contact List</button>
+          </Link>
+          <Link to="/userprofile">
+            <button>Edit Profile</button>
+          </Link>
           <br />
           <Link to="/">Return back to Homepage</Link>
         </nav>
