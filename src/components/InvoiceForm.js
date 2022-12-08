@@ -20,9 +20,9 @@ import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
-const steps = ["Add Group", "Name Your Invoice"];
+const steps = ["Add Group", "Name Invoice"];
 
-const captions = ["Who is splitting with you?", "Add a name and date"];
+const captions = ["Who is splitting with you?", "Name and date your invoice"];
 
 export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
@@ -178,7 +178,7 @@ export default function InvoiceForm(props) {
         {activeStep === steps.length ? (
           <React.Fragment>
             <Typography sx={{ mt: 2, mb: 1 }}>
-              Invoice created! Go to Homepage to edit the record.
+              Invoice created! Click on Invoices to edit the record.
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
               <Box sx={{ flex: "1 1 auto" }} />

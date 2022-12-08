@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Box } from "@mui/material";
 import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "../firebase";
-import InvoiceDisplay from "./InvoiceDisplay";
-import { Link, Outlet } from "react-router-dom";
+import InvoiceCard from "./InvoiceCard";
+import { Link } from "react-router-dom";
 
 //to retrieve and display the invoices onto the homepage
 //properties currentUser and setCurrentRecordListener are passed from App.js
@@ -40,34 +41,54 @@ export default function InvoiceRetrieve(props) {
 
   return (
     <div>
-      <center>
-        <h2>Invoices Section</h2>
-      </center>
-      <br />
-      <div className="row-flex">
+      <nav>
+        <Link to={`/invoices/createinvoice`}>
+          <button>+ New Invoice</button>
+        </Link>
+      </nav>
+      <Box display="flex" flexWrap="wrap" width="100%" gap={1}>
         {Object.keys(filteredInvoiceList).length > 0 ? (
           Object.keys(filteredInvoiceList).map((entry) => (
-            <Link to={`/invoices/${entry}`}>
-              <InvoiceDisplay
-                {...filteredInvoiceList[entry]}
-                deleterights={
-                  props.currentUser.email ===
-                  filteredInvoiceList[entry].author.email
-                }
-                key={entry}
-                idvalue={entry}
-                clickMe={() => {
-                  props.setCurrentRecordListener(entry);
-                }}
-              />
-            </Link>
+            <InvoiceCard
+              {...filteredInvoiceList[entry]}
+              deleterights={
+                props.currentUser.email ===
+                filteredInvoiceList[entry].author.email
+              }
+              key={entry}
+              idvalue={entry}
+              clickMe={() => {
+                props.setCurrentRecordListener(entry);
+              }}
+            />
           ))
         ) : (
           <p>No records 🎉. Split-A-Bill to begin.</p>
         )}
-      </div>
-      <hr />
-      <Outlet />
+      </Box>
     </div>
   );
 }
+
+// {
+//   /* <div className="row-flex">
+//         {Object.keys(filteredInvoiceList).length > 0 ? (
+//           Object.keys(filteredInvoiceList).map((entry) => (
+//             <InvoiceCard
+//               {...filteredInvoiceList[entry]}
+//               deleterights={
+//                 props.currentUser.email ===
+//                 filteredInvoiceList[entry].author.email
+//               }
+//               key={entry}
+//               idvalue={entry}
+//               clickMe={() => {
+//                 props.setCurrentRecordListener(entry);
+//               }}
+//             />
+//           ))
+//         ) : (
+//           <p>No records 🎉. Split-A-Bill to begin.</p>
+//         )}
+//       </div> */
+// }

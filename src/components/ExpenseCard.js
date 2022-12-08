@@ -1,14 +1,14 @@
 import React from "react";
 import { ref as databaseRef, remove } from "firebase/database";
 import { database } from "../firebase";
-import "./DisplayExpense.css";
+import "./ExpenseCard.css";
 
 const getFormattedPrice = (price) => {
   const priceTwoDecimal = Number(price).toFixed(2);
   return priceTwoDecimal;
 };
 
-export default function DisplayExpense(props) {
+export default function ExpenseCard(props) {
   const pricePerPax = () => {
     let output = (props.amount / props.splitBy.length).toFixed(2);
     return output;

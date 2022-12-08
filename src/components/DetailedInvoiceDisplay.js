@@ -10,7 +10,8 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import DisplayExpense from "./DisplayExpense";
+import { List, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
+import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
 
@@ -108,7 +109,7 @@ export default function DetailedInvoiceDisplay(props) {
     <div className="row-flex">
       {props.currentRecord.expenses &&
         Object.keys(props.currentRecord.expenses).map((entry) => (
-          <DisplayExpense
+          <ExpenseCard
             {...props.currentRecord.expenses[entry]}
             invoicekey={props.currentKey}
             expensekey={entry}
@@ -150,16 +151,7 @@ export default function DetailedInvoiceDisplay(props) {
           📅 {props.currentRecord.date} || ✍{" "}
           {props.currentRecord.author && props.currentRecord.author.username}{" "}
         </h2>
-        <h4>
-          {props.currentRecord.group ? props.currentRecord.group.length : 0}{" "}
-          members:
-        </h4>
-        <div className="flex-grouplist">
-          {props.currentRecord.group &&
-            props.currentRecord.group.map((k, i) => <div>{k.label}</div>)}
-        </div>
       </center>
-      <hr />
 
       <Box sx={{ width: "100%" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -169,19 +161,58 @@ export default function DetailedInvoiceDisplay(props) {
             aria-label="basic tabs example"
             centered
           >
-            <Tab label="Records of Expenses" {...a11yProps(0)} />
-            <Tab label="Split Bill" {...a11yProps(1)} />
+            <Tab label="Expenses" {...a11yProps(0)} />
+            <Tab
+              label={
+                props.currentRecord.group &&
+                props.currentRecord.group.length === 1
+                  ? "1 Member"
+                  : `${props.currentRecord.group.length} Members`
+              }
+              {...a11yProps(1)}
+            />
+            <Tab label="Split Bill" {...a11yProps(2)} />
           </Tabs>
         </Box>
+
         <TabPanel value={value} index={0}>
           {editButtons}
           <br />
           {displayAllExpenses}
         </TabPanel>
+
         <TabPanel value={value} index={1}>
+          <ContactsIterator currentRecord={props.currentRecord} />
+        </TabPanel>
+
+        <TabPanel value={value} index={2}>
           {displaySplitBill}
         </TabPanel>
       </Box>
     </div>
   );
 }
+
+const ContactsIterator = (props) => {
+  return (
+    <Box>
+      <List>
+        {props.currentRecord.group &&
+          props.currentRecord.group.map((contact) => (
+            <ListItem>
+              <ListItemAvatar>pfp</ListItemAvatar>
+              <ListItemText
+                primary={`${contact.label}`}
+                secondary={<>{contact.value}</>}
+              />
+            </ListItem>
+          ))}
+      </List>
+    </Box>
+  );
+};
+
+// <div>
+//   {props.currentRecord.group &&
+//     props.currentRecord.group.map((contact, i) => <div>{contact.label}</div>)}
+// </div>;
