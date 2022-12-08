@@ -7,6 +7,22 @@
     color: red;
   }
 
+.tick {
+  float: right;
+}
+.tick:hover{
+  color: lawngreen;
+  cursor: pointer;
+}
+
+.cross {
+  float: right;
+}
+.cross:hover{
+  color: red;
+  cursor: pointer;
+}
+
 
 .requests{
     background-color: aliceblue;

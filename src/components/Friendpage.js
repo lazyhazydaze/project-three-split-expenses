@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from 'firebase/auth'
-import { child, get, update, ref, onValue} from 'firebase/database'
+import { child, get, update, ref, onValue, set} from 'firebase/database'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { database, auth, dbRef } from '../firebase'
@@ -42,13 +42,25 @@ export const Friendpage = () => {
   
         get(child(dbRef, `users`))
             .then((snapshot)=>{
-                console.log(snapshot)
                 if(snapshot.exists()){
-                    console.log(snapshot.val())
+                    console.log("snapshot all users",snapshot.val())
                     //need to add input validation to check if friend exists (snapshot.val() lists all users on database, can filter it to find friendID)
-                    update(ref(database, `users/` + friendID),{
-                        friendRequestFrom: [user.uid]
+                    get(child(dbRef, `users/${friendID}/friendRequestFrom`)).then((snapshot)=>{
+                        console.log("get snashot",snapshot.val())
+                        
+                        if(snapshot.val() == null) {
+                            console.log("set ran")
+                            const updates = {}
+                            updates[`friendRequestFrom`] = [user.uid]
+                            update(ref(database, `users/${friendID}`), updates)
+                        } else {
+                            console.log("update ran")
+                            const updates = {}
+                            updates[`users/${friendID}/friendRequestFrom`] = [...snapshot.val(), user.uid]
+                            update(ref(database), updates)
+                        }
                     })
+                    
                 } else {
                     console.log("No data avail")
                 }
@@ -71,13 +83,14 @@ export const Friendpage = () => {
         //     setNumberOfRequests(snapshot.val().length)
         // })
         if(user == null)return
-        console.log("user",user)
-        console.log("getfrienduseruid",user.uid)
         get(child(dbRef, `users/${user.uid}/friendRequestFrom`)) //why is this breaking????? i want the below code
             .then((snapshot) => {
-                console.log("snap",snapshot.val())
-                setRequestList(snapshot.val())
-                setNumberOfRequests(snapshot.val().length)
+                if(snapshot.val()!=null){
+                    console.log("snap",snapshot.val())
+                    setRequestList(snapshot.val())
+        
+                    setNumberOfRequests(snapshot.val().length)
+                }
             })
                 // .then(()=>{
                 //     console.log("requestlist",requestList)
@@ -90,13 +103,11 @@ export const Friendpage = () => {
                 //     })
                 // })
     }
-    const pingpongball = false
 
     useEffect(()=>{
         const unsubscribe = onAuthStateChanged(auth,(user)=>{
             if(user){
                 setUser(auth.currentUser)
-                pingpongball = true
             }   
             else {
                 navigate("/Login")
@@ -108,27 +119,27 @@ export const Friendpage = () => {
     },[])
 
 
-    useEffect(()=>{ // how do i get useeffect to run ONLY AFTER the useeffect on top??????????
+    useEffect(()=>{ 
         getCurrentFriendRequests()
     },[user])
-    // if(user !== null){
-    //     console.log("friendpageuser",user)
-    //     getCurrentFriendRequests()
-    // } i need getCurrenFriendRequests() to run once after the function on top
+
 
     useEffect(()=>{
-            console.log("requestlist",requestList)
-                    requestList.forEach((uid)=>{
-                        get(child(dbRef, `users/${uid}/username`))
-                            .then((username) =>{
-                                console.log("username",username.val())
-                                let newarr = [...requestListUsernames, username.val()]
-                                console.log("newarr",newarr)
-                                setRequestListUsernames(newarr)
-                            })
-                    })
-    },[requestList])
+        if(requestList==null)return;
 
+        let newarr = []
+        requestList.forEach(async (uid,index)=>{
+            await get(child(dbRef, `users/${uid}/username`))
+                .then((username) =>{
+                    newarr = [...newarr, username.val()]
+                    if(index == requestList.length - 1){
+                        console.log("newarr",newarr)
+                        setRequestListUsernames(newarr)
+                    }
+                });
+        })        
+    },[requestList])
+    
     const acceptfriendwindow = useRef()
     const openAcceptRequestWindow= () =>{
         const acceptfriendwindowref = acceptfriendwindow.current
@@ -137,6 +148,75 @@ export const Friendpage = () => {
     const closeAcceptRequestWindow = () => {
         const acceptfriendwindowref = acceptfriendwindow.current
         acceptfriendwindowref.classList.remove("display")
+    }
+
+    const acceptFriendRequest = (username,index) => {
+        //delete pendingfriendreqeuest array 
+        //create new friendswith array
+        //access database once and do both at same time?
+        
+        //get uid from username
+        const thisfriendid = requestList[index]
+        console.log("thisfriendid",thisfriendid)
+
+        get(child(dbRef, `users/${user.uid}/friendRequestFrom`)).then((snapshot)=>{ //delete the pending friend request
+            console.log("accept",snapshot.val())
+            const newarr = snapshot.val().filter(x => x != thisfriendid) //change username to friend id
+            console.log("username",username)
+            console.log("filter newarr",newarr)
+            return newarr
+        }).then((newarr)=>{
+            
+            // set(ref(database,`users/${user.uid}`),{ // more testing needs to be done on update or set
+            //     friendRequestFrom : newarr
+            // })
+            const updates = {}
+            updates[`users/${user.uid}/friendRequestFrom`] = [newarr]
+            update(ref(database),updates)
+            // updates[]
+        })
+
+        get(child(dbRef,`users/${user.uid}/currentFriends`)).then((snapshot)=>{  //add the guy to current friends
+
+            // console.log(snapshot)
+            // console.log(snapshot.val())
+            if(snapshot.val() == null){ //first time adding friend, initialize currentFriends array
+                
+                const updates = {}
+                updates[`users/${user.uid}/currentFriends`] = [username]
+                update(ref(database),updates)
+            } else{ //subsequent friends when currentFriends array alr exsists
+                console.log(snapshot.val())
+                
+                const updates = {}
+                updates[`users/${user.uid}/currentFriends`] = [...snapshot.val(), username]
+                update(ref(database),updates)
+            }
+            
+        })
+       
+        //remove map from page
+    }
+
+    const rejectFriendRequest = (username,index) => {
+        const thisfriendid = requestList[index]
+
+        get(child(dbRef, `users/${user.uid}/friendRequestFrom`)).then((snapshot)=>{ //delete the pending friend request
+            console.log("accept",snapshot.val())
+            const newarr = snapshot.val().filter(x => x != thisfriendid) //change username to friend id
+            console.log("username",username)
+            console.log("filter newarr",newarr)
+            return newarr
+        }).then((newarr)=>{
+            
+            // set(ref(database,`users/${user.uid}`),{ // more testing needs to be done on update or set
+            //     friendRequestFrom : newarr
+            // })
+            const updates = {}
+            updates[`users/${user.uid}/friendRequestFrom`] = [newarr]
+            update(ref(database),updates)
+            // updates[]
+        })
     }
 
   return (
@@ -160,20 +240,28 @@ export const Friendpage = () => {
                 
                     <span onClick={openAcceptRequestWindow} className='requests'>{`${numberOfRequests} new requests`}</span>
             </div>
+
             <div ref={acceptfriendwindow} className={"acceptfriend"}>
                 <div className='acceptfriend-content'> 
                     Friend Requests
                     <span className="close" onClick={closeAcceptRequestWindow}>&times;</span> 
                     {/* map the friend requests use jsx */}
-                    {console.log("List",requestListUsernames)}
-                    {requestListUsernames.map((id) => {
-                        return <div>
-                                    <p>{`${id}`}</p>
-                                </div>
-                    })}
+                    {/* {console.log("List",requestListUsernames)}
+                    {console.log("reqlist",requestList)} */}
+                    {requestList.length > 0 
+                        ? requestListUsernames.map((username, index ) => {
+                            return <div key={index}>
+                                        {/* {console.log("key",)} */}
+                                        <span>{`${username}`}</span>
+                                        <span className="cross" onClick={()=>rejectFriendRequest(username,index)}>&#x2717;</span>
+                                        <span className="tick" onClick={()=>acceptFriendRequest(username,index)}>&#x2713;</span> 
+                                        
+                                    </div>
+                        })
+                        : <p>no friend requests</p>
+                    }
+                    
                 </div>
-                
-
             </div>
     </>
   )
