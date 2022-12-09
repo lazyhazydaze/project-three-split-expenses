@@ -10,7 +10,15 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { List, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
+import {
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Container,
+  Card,
+  CardContent,
+} from "@mui/material";
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
@@ -106,19 +114,21 @@ export default function DetailedInvoiceDisplay(props) {
   );
 
   const displayAllExpenses = (
-    <div className="row-flex">
-      {props.currentRecord.expenses &&
-        Object.keys(props.currentRecord.expenses).map((entry) => (
-          <ExpenseCard
-            {...props.currentRecord.expenses[entry]}
-            invoicekey={props.currentKey}
-            expensekey={entry}
-            deleterights={
-              props.currentRecord.author.email === props.currentUser.email
-            }
-          />
-        ))}
-    </div>
+    <Box>
+      <List>
+        {props.currentRecord.expenses &&
+          Object.keys(props.currentRecord.expenses).map((entry) => (
+            <ExpenseCard
+              {...props.currentRecord.expenses[entry]}
+              invoicekey={props.currentKey}
+              expensekey={entry}
+              deleterights={
+                props.currentRecord.author.email === props.currentUser.email
+              }
+            />
+          ))}
+      </List>
+    </Box>
   );
   const displaySplitBill = (
     <div>
@@ -150,50 +160,54 @@ export default function DetailedInvoiceDisplay(props) {
 
   return (
     <div>
-      <center>
-        <h1>{props.currentRecord.invoice}</h1>
-        <h2>
-          📅 {props.currentRecord.date} || ✍{" "}
-          {props.currentRecord.author && props.currentRecord.author.username}{" "}
-        </h2>
-      </center>
-
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="basic tabs example"
-            centered
-          >
-            <Tab label="Expenses" {...a11yProps(0)} />
-            <Tab
-              label={
-                props.currentRecord.group &&
-                props.currentRecord.group.length === 1
-                  ? "1 Member"
-                  : `${props.currentRecord.group.length} Members`
-              }
-              {...a11yProps(1)}
-            />
-            <Tab label="Split Bill" {...a11yProps(2)} />
-          </Tabs>
+      <Container sx={{ maxWidth: { xl: 1280 } }}>
+        <Box display="flex" mb={1}>
+          <Box ml={2} flex="1">
+            <Typography variant="h5">{props.currentRecord.invoice}</Typography>
+            <Typography variant="body2">
+              📅{props.currentRecord.date}, ✍
+              {props.currentRecord.author &&
+                props.currentRecord.author.username}
+            </Typography>
+          </Box>
         </Box>
 
-        <TabPanel value={value} index={0}>
-          {editButtons}
-          <br />
-          {displayAllExpenses}
-        </TabPanel>
+        <Box sx={{ width: "100%" }}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="basic tabs example"
+            >
+              <Tab label="Expenses" {...a11yProps(0)} />
+              <Tab
+                label={
+                  props.currentRecord.group &&
+                  props.currentRecord.group.length === 1
+                    ? "1 Member"
+                    : `${props.currentRecord.group.length} Members`
+                }
+                {...a11yProps(1)}
+              />
+              <Tab label="Split Bill" {...a11yProps(2)} />
+            </Tabs>
+          </Box>
 
-        <TabPanel value={value} index={1}>
-          <ContactsIterator currentRecord={props.currentRecord} />
-        </TabPanel>
+          <TabPanel value={value} index={0}>
+            {editButtons}
+            <br />
+            {displayAllExpenses}
+          </TabPanel>
 
-        <TabPanel value={value} index={2}>
-          {displaySplitBill}
-        </TabPanel>
-      </Box>
+          <TabPanel value={value} index={1}>
+            <ContactsIterator currentRecord={props.currentRecord} />
+          </TabPanel>
+
+          <TabPanel value={value} index={2}>
+            {displaySplitBill}
+          </TabPanel>
+        </Box>
+      </Container>
     </div>
   );
 }

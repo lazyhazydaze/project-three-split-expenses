@@ -1,8 +1,11 @@
 import React from "react";
 
+import { Container } from "@mui/material";
+
 export default function Homepage(props) {
   return (
-    <div>
+    
+      <Container sx={{ maxWidth: { xl: 1280 } }}>
       <h1>
         Welcome, {props.username.displayName} <br />
         <br /> - Add dashboard here later. <br /> - Retrieve pfp photourl from
@@ -13,6 +16,6 @@ export default function Homepage(props) {
         detailed invoice display <br /> - Why refresh the detailedinvoicepage
         will be blank page?
       </h1>
-    </div>
+    </Container>
   );
 }

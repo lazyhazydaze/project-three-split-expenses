@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "../firebase";
 import InvoiceCard from "./InvoiceCard";
@@ -40,7 +40,7 @@ export default function InvoiceRetrieve(props) {
   }, [invoiceList, props.currentUser]);
 
   return (
-    <div>
+    <Container sx={{ maxWidth: { xl: 1280 } }}>
       <nav>
         <Link to={`/invoices/createinvoice`}>
           <button>+ New Invoice</button>
@@ -66,7 +66,7 @@ export default function InvoiceRetrieve(props) {
           <p>No records 🎉. Split-A-Bill to begin.</p>
         )}
       </Box>
-    </div>
+    </Container>
   );
 }
 

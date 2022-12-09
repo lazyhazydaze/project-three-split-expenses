@@ -3,6 +3,14 @@ import { ref as databaseRef, remove } from "firebase/database";
 import { database } from "../firebase";
 import "./ExpenseCard.css";
 
+import {
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction,
+  Typography,
+} from "@mui/material";
+
 const getFormattedPrice = (price) => {
   const priceTwoDecimal = Number(price).toFixed(2);
   return priceTwoDecimal;
@@ -26,23 +34,42 @@ export default function ExpenseCard(props) {
   props.splitBy.forEach((spender) => spenderArray.push(spender.label));
 
   return (
-    <div className="column">
-      <div className="card">
-        <h3>{props.item.toUpperCase()}</h3>
-        <p>
-          <b>${getFormattedPrice(props.amount)}</b> (${pricePerPax()}/px)
-        </p>
-        <p>
-          <p>
-            <i>{spenderArray.join(", ")}</i>{" "}
-          </p>
-        </p>
+    <ListItem>
+      <ListItemAvatar>
         {props.deleterights && (
           <button value={props.expensekey} onClick={deleteRecord}>
             ✖
           </button>
         )}
-      </div>
-    </div>
+      </ListItemAvatar>
+      <ListItemText
+        primary={props.item.toUpperCase()}
+        secondary={spenderArray.join(", ")}
+      />
+      <ListItemSecondaryAction>
+        <Typography variant="body2" color="textSecondary" component="span">
+          ${getFormattedPrice(props.amount)} (${pricePerPax()}/px)
+        </Typography>
+      </ListItemSecondaryAction>
+    </ListItem>
   );
 }
+
+// <div>
+//   <div className="card">
+//     <h3>{props.item.toUpperCase()}</h3>
+//     <p>
+//       <b>${getFormattedPrice(props.amount)}</b> (${pricePerPax()}/px)
+//     </p>
+//     <p>
+//       <p>
+//         <i>{spenderArray.join(", ")}</i>{" "}
+//       </p>
+//     </p>
+//     {props.deleterights && (
+//       <button value={props.expensekey} onClick={deleteRecord}>
+//         ✖
+//       </button>
+//     )}
+//   </div>
+// </div>

@@ -19,6 +19,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { Container } from "@mui/material";
 
 const steps = ["Add Group", "Name Invoice"];
 
@@ -29,26 +30,25 @@ export default function InvoiceForm(props) {
   //author is an object, same as currentUser {displayName: "", email:""}
 
   //
-  const [contactList, setContactList] = useState([])
+  const [contactList, setContactList] = useState([]);
   const contactListCreate = () => {
-    get(databaseRef(database,`users/${props.currentUser.uid}/currentFriends`)).then((snapshot)=>{
-      if(snapshot.val() == null)return
+    get(
+      databaseRef(database, `users/${props.currentUser.uid}/currentFriends`)
+    ).then((snapshot) => {
+      if (snapshot.val() == null) return;
       // if(contactList == snapshot.val())return
-      console.log("contactList",contactList)
-      console.log("snapshot",snapshot.val())
+      console.log("contactList", contactList);
+      console.log("snapshot", snapshot.val());
       // console.log("contactlist",snapshot.val())
-      setContactList(snapshot.val())
+      setContactList(snapshot.val());
       // console.log("inside create after", contactList)
-      console.log("looping in contactListCreate")
-    })
-}
-  useEffect(()=>{
-    contactListCreate()
-  },[])
-    
-
+      console.log("looping in contactListCreate");
+    });
+  };
   
-
+  useEffect(() => {
+    contactListCreate();
+  }, []);
 
   //
   const [invoice, setInvoice] = useState("");
@@ -67,15 +67,14 @@ export default function InvoiceForm(props) {
     },
   ]);
 
-  const [combinedContactList,setCombinedContactList] = useState([])
+  const [combinedContactList, setCombinedContactList] = useState([]);
   // let combinedContactList = []
 
-
-  useEffect(()=>{
+  useEffect(() => {
     // console.log("contactList updated",contactList)
-    console.log("looping in useeffect")
-    console.log(contactList)
-    if(contactList.length == 0 )return
+    console.log("looping in useeffect");
+    console.log(contactList);
+    if (contactList.length == 0) return;
     // console.log("contactisnotundefined",contactList)
     setCombinedContactList([
       {
@@ -86,11 +85,10 @@ export default function InvoiceForm(props) {
       ...contactList,
     ]);
     // console.log("combined",combinedContactList)
-  },[contactList])
-  console.log("combined",combinedContactList)
+  }, [contactList]);
+  console.log("combined", combinedContactList);
 
   // add the currentUser to the top of the contact list and set it as a default fixed option.
-  
 
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {
@@ -199,7 +197,7 @@ export default function InvoiceForm(props) {
   const stepForm = [step1, step2];
 
   return (
-    <div>
+    <Container sx={{ maxWidth: { xl: 600 } }}>
       <Box sx={{ width: "100%" }}>
         <Stepper activeStep={activeStep}>
           {steps.map((label, index) => {
@@ -246,6 +244,6 @@ export default function InvoiceForm(props) {
           </React.Fragment>
         )}
       </Box>
-    </div>
+    </Container>
   );
 }
