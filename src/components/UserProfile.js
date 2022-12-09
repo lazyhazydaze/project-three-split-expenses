@@ -131,44 +131,33 @@ export const UserProfile = () => {
     });
   };
 
-  const editUsername = () => {};
+  const [newUsername, setNewUsername]=useState("")
 
-  // const addfriendwindow = useRef()
-  // // const [friendName, setFriendName] = useState("")
-  // const [friendID, setFriendID] = useState("")
+  const editusernamewindow = useRef()
+  const openEditUsername = () => {
+    const editusernamewindowref = editusernamewindow.current
+    editusernamewindowref.classList.add("display")
+  };
+  const closeEditUsername = () => {
+    const editusernamewindowref = editusernamewindow.current
+    editusernamewindowref.classList.remove("display")
+  }
 
-  // const openAddFriendMenu = () => {
-  //         //more userefs
-  //     const addfriendwindowref = addfriendwindow.current
-  //     addfriendwindowref.classList.add("display")
-  // }
+  const editUsername = (e) =>{
+    e.preventDefault()
+    if(newUsername.length==0)return
 
-  // const closeAddFriendMenu = () => {
-  //     const addfriendwindowref = addfriendwindow.current
-  //     addfriendwindowref.classList.remove("display")
-  // }
+    const updates = {}
+    updates[`users/${user.uid}/username`] = newUsername
+    update(ref(database),updates)
 
-  // const sendFriendRequest = (e) =>{
-  //     e.preventDefault()
+    updateProfile(auth.currentUser, {
+      displayName: newUsername
+    })
 
-  //     get(child(dbRef, `users`))
-  //         .then((snapshot)=>{
-  //             console.log(snapshot)
-  //             if(snapshot.exists()){
-  //                 console.log(snapshot.val())
-  //                 //need to add input validation to check if friend exists (snapshot.val() lists all users on database, can filter it to find friendID)
-  //                 update(ref(database, `users/` + friendID),{
-  //                     friendRequestFrom: [user.uid]
-  //                 })
-  //             } else {
-  //                 console.log("No data avail")
-  //             }
-  //         })
-  //         .then(()=>{
-  //             closeAddFriendMenu()
-  //         })
-
-  // }
+    closeEditProfile()
+    closeEditUsername()
+  }
 
   return (
     <>
@@ -185,37 +174,45 @@ export const UserProfile = () => {
             }
           />
           <h2>Hello {`${username}`}</h2>
-          <button onClick={editProfile}>edit profile</button>
+          <button onClick={editProfile}>show profile</button>
         </div>
 
         <div ref={popupwindow} className={"popup"}>
           <div className="popup_content">
-            <span className="close" onClick={closeEditProfile}>
-              &times;
-            </span>
-            <img
-              onClick={displayUploadImageForm}
-              className="pfp"
-              src={
-                photoURL == null
-                  ? "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
-                  : `${photoURL}`
-              }
-            />
-            <br />
+            <span className="close" onClick={closeEditProfile}>&times;</span>
+            <div className="pfpdiv">
+              <img
+                onClick={displayUploadImageForm}
+                className="pfp"
+                src={
+                  photoURL == null
+                    ? "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
+                    : `${photoURL}`
+                }
+              />
+             
+            </div>
+            <div className={"pfpdivbutton"}>
             <button
-              style={
-                photoURL == null ? { display: "none" } : { display: "block" }
-              }
-              onClick={removeProfilePicture}
-            >
-              Remove picture
-            </button>
-            <br />
+                style={
+                  photoURL == null ? { display: "none" } : { display: "block" }
+                }
+                onClick={removeProfilePicture}
+              >
+                Remove picture
+              </button>
+            </div>
+            
+            
+            {/* <br /> */}
+            <p className="friendid">Your friendID: {`${user.uid}`}</p>
+            
             <span>Username: {`${username}`}</span>
-            <span className="edit" onClick={editUsername}>
+            <span className="edit" onClick={openEditUsername}>
               Edit
             </span>
+            
+
             <p>Registered Email: {`${email}`}</p>
 
             <div ref={uploadimagewindow} className={"uploadImageForm"}>
@@ -233,22 +230,18 @@ export const UserProfile = () => {
                 <input type={"submit"} />
               </form>
             </div>
+
+            <div ref={editusernamewindow} className={"editusernamewindow"}>
+                Input new username
+                <span className="close" onClick={closeEditUsername}>&times;</span>
+                  <form onSubmit={(e)=>{editUsername(e)}}>
+                    <input type={"text"} onChange={(e)=>{setNewUsername(e.target.value)}}></input>
+                    <input type={"submit"}></input>
+                  </form>
+            </div>
+            
           </div>
         </div>
-
-        {/* <div>
-                <h2>Friend List</h2>
-                <button onClick={openAddFriendMenu}>Add Friend</button>
-            </div>
-
-            <div ref={addfriendwindow} className={"addfriend"}>
-                Add friend menu
-                <span className="close" onClick={closeAddFriendMenu}>&times;</span> 
-                <form onSubmit={(e)=>sendFriendRequest(e)}>
-                    <input type={"text"} onChange={(e)=>{setFriendID(e.target.value)}} placeholder={"enter UID to add"} />
-                    <input type={"submit"}/>
-                </form>
-            </div> */}
       </div>
     </>
   );

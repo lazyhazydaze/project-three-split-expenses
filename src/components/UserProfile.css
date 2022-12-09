@@ -51,8 +51,19 @@ img{
     color:rgb(71, 84, 223)
   }
 
+  .pfpdiv{
+    display: flex;
+    justify-content: center;
+  }
+
   .pfp:hover{
     cursor: pointer;
+  }
+
+  .pfpdivbutton{
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
   }
 
 .uploadImageForm{
@@ -88,4 +99,24 @@ img{
 
 .addfriend.display{
   display: block;
+}
+
+.editusernamewindow {
+  display: none;
+  background-color: white;
+  position: relative;
+  top: 20%;
+  left: 30%;
+  width: 40%;
+  padding: 20px;
+  border-radius: 5px;
+  border: 2px solid black;
+}
+
+.editusernamewindow.display {
+  display: block;
+}
+
+.friendid {
+  color: rgb(174, 174, 174);
 }

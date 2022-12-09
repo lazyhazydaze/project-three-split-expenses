@@ -7,6 +7,25 @@
     color: red;
   }
 
+.tick {
+
+}
+.tick:hover{
+  color: lawngreen;
+  cursor: pointer;
+}
+
+.cross {
+}
+.cross:hover{
+  color: red;
+  cursor: pointer;
+}
+
+.crosstick-herder{
+  display: flex;
+  justify-content: space-between;
+}
 
 .requests{
     background-color: aliceblue;
