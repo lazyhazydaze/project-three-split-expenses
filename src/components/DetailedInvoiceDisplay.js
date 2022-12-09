@@ -123,17 +123,22 @@ export default function DetailedInvoiceDisplay(props) {
   const displaySplitBill = (
     <div>
       {props.currentRecord.expenses ? (
-        <div className="flex-receipt">
-          {props.currentRecord.group &&
-            props.currentRecord.group.map(
-              (name) =>
-                props.overallReceipt[name.value] && (
-                  <ReceiptDisplay
-                    name={name}
-                    receipt={props.overallReceipt[name.value]}
-                  />
-                )
-            )}
+        <div>
+          {props.currentRecord.group && (
+            <Box>
+              <List>
+                {props.currentRecord.group.map(
+                  (contact) =>
+                    props.overallReceipt[contact.value] && (
+                      <ReceiptDisplay
+                        name={contact}
+                        receipt={props.overallReceipt[contact.value]}
+                      />
+                    )
+                )}
+              </List>
+            </Box>
+          )}
         </div>
       ) : (
         <center>
