@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ref as databaseRef, push, set } from "firebase/database";
+import { ref as databaseRef, push, set, get } from "firebase/database";
 import { database } from "../firebase";
 
 // Placeholder contactlist for selection purposes
-import { contactList } from "../data";
+// import { contactList } from "../data";
 
 // Libraries for styling
 import Select from "react-select";
@@ -28,6 +28,29 @@ export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
   //author is an object, same as currentUser {displayName: "", email:""}
 
+  //
+  const [contactList, setContactList] = useState([])
+  const contactListCreate = () => {
+    get(databaseRef(database,`users/${props.currentUser.uid}/currentFriends`)).then((snapshot)=>{
+      if(snapshot.val() == null)return
+      // if(contactList == snapshot.val())return
+      console.log("contactList",contactList)
+      console.log("snapshot",snapshot.val())
+      // console.log("contactlist",snapshot.val())
+      setContactList(snapshot.val())
+      // console.log("inside create after", contactList)
+      console.log("looping in contactListCreate")
+    })
+}
+  useEffect(()=>{
+    contactListCreate()
+  },[])
+    
+
+  
+
+
+  //
   const [invoice, setInvoice] = useState("");
   const [author, setAuthor] = useState({
     username: props.currentUser.displayName,
@@ -44,15 +67,30 @@ export default function InvoiceForm(props) {
     },
   ]);
 
+  const [combinedContactList,setCombinedContactList] = useState([])
+  // let combinedContactList = []
+
+
+  useEffect(()=>{
+    // console.log("contactList updated",contactList)
+    console.log("looping in useeffect")
+    console.log(contactList)
+    if(contactList.length == 0 )return
+    // console.log("contactisnotundefined",contactList)
+    setCombinedContactList([
+      {
+        value: props.currentUser.email,
+        label: props.currentUser.displayName,
+        isFixed: true,
+      },
+      ...contactList,
+    ]);
+    // console.log("combined",combinedContactList)
+  },[contactList])
+  console.log("combined",combinedContactList)
+
   // add the currentUser to the top of the contact list and set it as a default fixed option.
-  let combinedContactList = [
-    {
-      value: props.currentUser.email,
-      label: props.currentUser.displayName,
-      isFixed: true,
-    },
-    ...contactList,
-  ];
+  
 
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
   useEffect(() => {

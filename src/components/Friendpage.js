@@ -176,25 +176,32 @@ export const Friendpage = () => {
             // updates[]
         })
 
-        get(child(dbRef,`users/${user.uid}/currentFriends`)).then((snapshot)=>{  //add the guy to current friends
+        let friendEmail = ""
+        get(child(dbRef,`users/${thisfriendid}/email`)).then((snapshot)=>{
+            friendEmail = snapshot.val()
+        }).then(()=>{
+            get(child(dbRef,`users/${user.uid}/currentFriends`)).then((snapshot)=>{  //add the guy to current friends
 
-            // console.log(snapshot)
-            // console.log(snapshot.val())
-            if(snapshot.val() == null){ //first time adding friend, initialize currentFriends array
+                // console.log(snapshot)
+                // console.log(snapshot.val())
+                if(snapshot.val() == null){ //first time adding friend, initialize currentFriends array
+                    
+                    const updates = {}
+                    updates[`users/${user.uid}/currentFriends`] = [{value:friendEmail, label:username}]
+                    update(ref(database),updates)
+                } else{ //subsequent friends when currentFriends array alr exsists
+                    console.log(snapshot.val())
+                    
+                    const updates = {}
+                    updates[`users/${user.uid}/currentFriends`] = [...snapshot.val(), {value:friendEmail, label:username}]
+                    update(ref(database),updates)
+                }
                 
-                const updates = {}
-                updates[`users/${user.uid}/currentFriends`] = [username]
-                update(ref(database),updates)
-            } else{ //subsequent friends when currentFriends array alr exsists
-                console.log(snapshot.val())
-                
-                const updates = {}
-                updates[`users/${user.uid}/currentFriends`] = [...snapshot.val(), username]
-                update(ref(database),updates)
-            }
-            
+            })
         })
-       
+
+        
+        closeAcceptRequestWindow()
         //remove map from page
     }
 
@@ -217,6 +224,7 @@ export const Friendpage = () => {
             update(ref(database),updates)
             // updates[]
         })
+        closeAcceptRequestWindow()
     }
 
   return (
@@ -250,13 +258,17 @@ export const Friendpage = () => {
                     {console.log("reqlist",requestList)} */}
                     {requestList.length > 0 
                         ? requestListUsernames.map((username, index ) => {
-                            return <div key={index}>
+                            return <div key={index} style={{position:"relative"}}>
                                         {/* {console.log("key",)} */}
-                                        <span>{`${username}`}</span>
-                                        <span className="cross" onClick={()=>rejectFriendRequest(username,index)}>&#x2717;</span>
-                                        <span className="tick" onClick={()=>acceptFriendRequest(username,index)}>&#x2713;</span> 
+                                        <div className="crosstick-herder">
+                                            <span>{`${username}`}</span>
+                                            <div>
+                                                <span className="tick" onClick={()=>acceptFriendRequest(username,index)}>&#x2713;</span> 
+                                                <span className="cross" onClick={()=>rejectFriendRequest(username,index)}>&#x2717;</span>
+                                            </div>
+                                        </div>
                                         
-                                    </div>
+                                    </div>// fix this css slowly tmr i want sleep early
                         })
                         : <p>no friend requests</p>
                     }

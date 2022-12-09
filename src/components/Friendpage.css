@@ -8,7 +8,7 @@
   }
 
 .tick {
-  float: right;
+
 }
 .tick:hover{
   color: lawngreen;
@@ -16,13 +16,16 @@
 }
 
 .cross {
-  float: right;
 }
 .cross:hover{
   color: red;
   cursor: pointer;
 }
 
+.crosstick-herder{
+  display: flex;
+  justify-content: space-between;
+}
 
 .requests{
     background-color: aliceblue;
