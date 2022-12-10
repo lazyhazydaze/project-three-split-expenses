@@ -40,43 +40,53 @@ export const Friendpage = () => {
           console.log("snapshot all users", snapshot.val());
           //need to add input validation to check if friend exists (snapshot.val() lists all users on database, can filter it to find friendID)
           let listOfUserObject = snapshot.val();
+          let doesExist = false;
           for (const [UID, userObject] of Object.entries(listOfUserObject)) {
-            if (userObject.email === friendID) {
-              if ("friendRequestFrom" in userObject) {
-                const updates = {};
-                updates[`users/${UID}/friendRequestFrom`] = [
-                  ...snapshot.val(),
-                  user.uid,
-                ];
-                update(ref(database), updates);
-              } else {
+            if (doesExist) {
+              break;
+            }
+            if (!doesExist && userObject.email === friendID) {
+              if (!doesExist && "currentFriends" in userObject) {
+                let currentFriendsList = [...userObject.currentFriends];
+                currentFriendsList.every((currentFriend) => {
+                  if (user.email === currentFriend.value) {
+                    alert("alr added as friend");
+                    doesExist = true;
+                    return false;
+                  }
+                });
+              }
+              if (!doesExist && "friendRequestFrom" in userObject) {
+                let oldFriendRequestFrom = [...userObject.friendRequestFrom];
+                if (oldFriendRequestFrom.includes(user.uid)) {
+                  //friend alr exist
+                  alert("friend req alr sent");
+                  doesExist = true;
+                } else {
+                  const updates = {};
+                  updates[`users/${UID}/friendRequestFrom`] = [
+                    ...userObject.friendRequestFrom,
+                    user.uid,
+                  ];
+                  update(ref(database), updates);
+                  alert("friend req sent");
+                  doesExist = true;
+                }
+              } else if (!doesExist) {
                 const updates = {};
                 updates[`friendRequestFrom`] = [user.uid];
                 update(ref(database, `users/${UID}`), updates);
+                alert("friend req sent");
+                doesExist = true;
               }
             }
           }
-
-          // get(child(dbRef, `users/${friendID}/friendRequestFrom`)).then((snapshot)=>{
-          //     console.log("get snashot",snapshot.val())
-
-          //     if(snapshot.val() == null) {
-          //         console.log("set ran")
-          //         const updates = {}
-          //         updates[`friendRequestFrom`] = [user.uid]
-          //         update(ref(database, `users/${friendID}`), updates)
-          //     } else {
-          //         console.log("update ran")
-          //         const updates = {}
-          //         updates[`users/${friendID}/friendRequestFrom`] = [...snapshot.val(), user.uid]
-          //         update(ref(database), updates)
-          //     }
-          // })
-        } else {
+          if (!doesExist) alert("user not in database");
           console.log("No data avail");
         }
       })
       .then(() => {
+        setFriendID("");
         closeAddFriendMenu();
       });
   };
@@ -216,7 +226,6 @@ export const Friendpage = () => {
           (snapshot) => {
             //add recipient to sender
             if (snapshot.val() == null) {
-
               const updates = {};
               updates[`users/${thisfriendid}/currentFriends`] = [
                 { value: user.email, label: user.displayName },
@@ -281,6 +290,7 @@ export const Friendpage = () => {
               setFriendID(e.target.value);
             }}
             placeholder={"enter email to add"}
+            value={friendID}
           />
           <input type={"submit"} />
         </form>
