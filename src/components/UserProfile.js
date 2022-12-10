@@ -1,8 +1,8 @@
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import React, { useEffect, useRef, useState } from "react";
-import { auth, database, storage } from "../firebase";
+import { auth, database, dbRef, storage } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { ref, update } from "firebase/database";
+import { child, onValue, ref, remove, update } from "firebase/database";
 import {
   getDownloadURL,
   ref as storageref,
@@ -14,6 +14,7 @@ export const UserProfile = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setPhotoURL] = useState("");
+  const [photoName, setPhotoName] = useState("");
   const [user, setUser] = useState("");
   // const user = useContext(UserContext) // shit doesnt persist across page refresh
   useEffect(() => {
@@ -21,33 +22,22 @@ export const UserProfile = () => {
       if (user) {
         setUsername(user.displayName);
         setEmail(user.email);
-        setPhotoURL(user.photoURL);
         setUser(auth.currentUser);
+        onValue(
+          child(dbRef, `users/${user.uid}/profilePicture`),
+          (snapshot) => {
+            if (snapshot.val()) {
+              setPhotoURL(snapshot.val());
+            } else {
+              setPhotoURL(null);
+            }
+          }
+        );
       } else {
         navigate("/Login");
       }
     });
   }, []); //run once on render
-
-  // const unsubAuthStateChanged = onAuthStateChanged(auth,(user)=>{
-  //     if(user){
-  //         // console.log("logged in")
-  //         setUsername(user.displayName)
-  //         setEmail(user.email)
-  //         setPhotoURL(user.photoURL)
-  //         setUser(auth.currentUser)
-  //     }
-  //     else {
-  //         // console.log("not logged in")
-  //         unsubAuthStateChanged()
-  //         navigate("/Login")
-  //     }
-  // })
-
-  // const setUnsub = useOutletContext()
-  // useEffect(()=>{
-  //     setUnsub(unsubAuthStateChanged)
-  // },[unsubAuthStateChanged])
 
   const navigate = useNavigate();
 
@@ -58,10 +48,7 @@ export const UserProfile = () => {
     //popup windows to be show for editing of profile
     // can edit username and profile pic
     const popupwindowref = popupwindow.current;
-    // popupwindowref.classList.add("testclass")
-    // popupwindowref.children[0].classList.add("testclass")
     popupwindowref.style.display = "block";
-    console.log(photoURL);
   };
 
   const closeEditProfile = () => {
@@ -87,6 +74,7 @@ export const UserProfile = () => {
       storage,
       `userdata/${username}/profilePicture`
     );
+
     uploadBytes(profilePicRef, file).then((snapshot) => {
       //set auth user.photoURL to storage picture url
       getDownloadURL(snapshot.ref).then((URL) => {
@@ -94,6 +82,7 @@ export const UserProfile = () => {
           photoURL: URL,
         })
           .then(() => {
+            setPhotoURL(photoURL);
             update(ref(database, "users/" + user.uid), {
               profilePicture: user.photoURL,
             });
@@ -101,6 +90,7 @@ export const UserProfile = () => {
           .then(() => {
             closeUploadImageForm();
             closeEditProfile();
+            setPhotoName("");
           });
         // })
       });
@@ -111,6 +101,7 @@ export const UserProfile = () => {
     updateProfile(user, {
       photoURL: "",
     });
+    remove(ref(database, "users/" + user.uid + "/profilePicture"));
   };
 
   const [newUsername, setNewUsername] = useState("");
@@ -149,9 +140,9 @@ export const UserProfile = () => {
         <div>
           <img
             src={
-              photoURL == null
-                ? "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
-                : `${photoURL}`
+              photoURL
+                ? `${photoURL}`
+                : "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
             }
           />
           <h2>Hello {`${username}`}</h2>
@@ -200,12 +191,18 @@ export const UserProfile = () => {
               <span className="close" onClick={closeUploadImageForm}>
                 &times;
               </span>
-              <form onSubmit={(e) => uploadImage(e)}>
+              <form
+                onSubmit={(e) => {
+                  uploadImage(e);
+                }}
+              >
                 <input
                   type={"file"}
                   onChange={(e) => {
                     setFile(e.target.files[0]);
+                    setPhotoName(e.target.value);
                   }}
+                  value={photoName}
                 />
                 <input type={"submit"} />
               </form>
