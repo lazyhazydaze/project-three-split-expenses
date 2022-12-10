@@ -76,8 +76,6 @@ export const UserProfile = () => {
     //popup windows to be show for editing of profile
     // can edit username and profile pic
     const popupwindowref = popupwindow.current;
-    // popupwindowref.classList.add("testclass")
-    // popupwindowref.children[0].classList.add("testclass")
     popupwindowref.style.display = "block";
     console.log(photoURL);
   };
