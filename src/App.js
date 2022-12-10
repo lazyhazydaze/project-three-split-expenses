@@ -10,8 +10,6 @@ import Header from "./components/Header";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
-import Homepage from "./components/Homepage";
-
 import { Login } from "./components/Login";
 import { Register } from "./components/Register";
 import { Friendpage } from "./components/Friendpage";
@@ -112,7 +110,15 @@ export default function App() {
         <Route path="Register" element={<Register />} />
 
         <Route path="/" element={<Header currentUser={currentUser} />}>
-          <Route path="/" element={<Homepage username={currentUser} />} />
+          <Route
+            path="/"
+            element={
+              <InvoiceRetrieve
+                currentUser={currentUser}
+                setCurrentRecordListener={setCurrentRecordListener}
+              />
+            }
+          />
           <Route path="contacts" element={<Friendpage />} />
           <Route
             path="invoices"
@@ -150,9 +156,6 @@ export default function App() {
           />
         </Route>
       </Routes>
-
-      {/* {console.log("line 194", currentRecord)}
-      {console.log("line 195", currentRecord.expenses)} */}
     </div>
   );
 }
