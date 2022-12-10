@@ -1,7 +1,8 @@
 import React from "react";
 import { ref as databaseRef, remove } from "firebase/database";
 import { database } from "../firebase";
-import "./ExpenseCard.css";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
 
 import {
   ListItem,
@@ -37,9 +38,9 @@ export default function ExpenseCard(props) {
     <ListItem>
       <ListItemAvatar>
         {props.deleterights && (
-          <button value={props.expensekey} onClick={deleteRecord}>
-            ✖
-          </button>
+          <IconButton aria-label="delete" onClick={deleteRecord}>
+            <DeleteIcon />
+          </IconButton>
         )}
       </ListItemAvatar>
       <ListItemText

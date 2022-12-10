@@ -54,7 +54,9 @@ export default function ReceiptDisplay(props) {
             </ListItemButton>
           </ListItem>
           <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Expenses for {props.name.label}</DialogTitle>
+            <center>
+              <DialogTitle>Expenses for {props.name.label}</DialogTitle>
+            </center>
             <DialogContent>
               <DialogContentText>
                 <AcccessibleTable receipt={props.receipt} />

@@ -2,6 +2,13 @@ import React, { useState } from "react";
 import { ref as databaseRef, push, set } from "firebase/database";
 import { database } from "../firebase";
 import Select from "react-select";
+import FormControl from "@mui/material/FormControl";
+import Input from "@mui/material/Input";
+import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
+import IconButton from "@mui/material/IconButton";
 
 export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
@@ -29,43 +36,61 @@ export default function ExpenseForm(props) {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="item"
-          maxLength={24}
-          value={item}
-          required
-          onChange={({ target }) => setItem(target.value)}
-          placeholder="Enter Item Name"
-        />
-        <input
-          type="text"
-          name="amount"
-          value={amount}
-          required
-          onChange={({ target }) => setAmount(target.value)}
-          pattern="^\d*(\.\d{0,2})?$"
-          placeholder="Enter Price (Up 2 d.p.)"
-        />
-        <br />
-        <br />
-        <div className="dropdown-container">
+      {/* <input
+        name="item"
+        maxLength={24}
+        required
+      /> */}
+      <center>
+        <FormControl required sx={{ m: 2, width: "80ch" }} variant="standard">
+          <InputLabel>Item Name</InputLabel>
+          <Input
+            required={true}
+            value={item}
+            onChange={({ target }) => setItem(target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <ShoppingCartOutlinedIcon />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+        <FormControl required sx={{ m: 2, width: "80ch" }} variant="standard">
+          <InputLabel>Amount</InputLabel>
+          <Input
+            required={true}
+            value={amount}
+            onChange={({ target }) => setAmount(target.value)}
+            startAdornment={<InputAdornment position="start">$</InputAdornment>}
+          />
+        </FormControl>
+        {/* <input
+        name="amount"
+        required
+        pattern="^\d*(\.\d{0,2})?$"
+        placeholder="Enter Price (Up 2 d.p.)"
+      /> */}
+        {/* <div className="dropdown-container"> */}
+        <FormControl required sx={{ m: 2, width: "80ch" }} variant="standard">
+          {/* <span>Select Name</span> */}
           <Select
             options={copyOfNameList}
-            placeholder="Split amongst?"
+            placeholder="Split amongst?*"
             value={splitBy}
             onChange={setSplitBy}
             isSearchable={true}
             isMulti
           />
-        </div>
+        </FormControl>
+        {/* </div> */}
         <br />
         <br />
-        <center>
-          <input type="submit" value="add record" />
-        </center>
-      </form>
+        <IconButton size="large" onClick={handleSubmit}>
+          <AddCircleOutlinedIcon color="primary" sx={{ fontSize: 40 }} />
+        </IconButton>
+        {/* <input type="submit" value="add record" /> */}
+      </center>
+      {/* </form> */}
     </div>
   );
 }

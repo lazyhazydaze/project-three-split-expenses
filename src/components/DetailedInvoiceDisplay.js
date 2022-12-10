@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { ref as databaseRef, remove } from "firebase/database";
 import { database } from "../firebase";
 import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -19,6 +22,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
@@ -82,15 +86,20 @@ export default function DetailedInvoiceDisplay(props) {
     remove(db);
   };
 
-  const editButtons = (
+  const addButton = (
     <center>
       {props.currentRecord.author &&
         props.currentRecord.author.email === props.currentUser.email && (
           <span>
-            <Button variant="outlined" onClick={handleClickOpen}>
-              Add new expense
+            <Button
+              variant="contained"
+              size="medium"
+              startIcon={<AddIcon />}
+              onClick={handleClickOpen}
+            >
+              Add Expense
             </Button>
-            <Dialog open={open} onClose={handleClose}>
+            <Dialog maxWidth="md" fullWidth open={open} onClose={handleClose}>
               <DialogContent>
                 <ExpenseForm
                   keyval={props.currentKey}
@@ -105,10 +114,22 @@ export default function DetailedInvoiceDisplay(props) {
             </Dialog>
           </span>
         )}
+    </center>
+  );
+
+  const clearAllButton = (
+    <center>
       {props.currentRecord &&
         props.currentRecord.expenses &&
         props.currentRecord.author.email === props.currentUser.email && (
-          <button onClick={clearRecords}>Clear all expenses</button>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<DeleteForeverIcon />}
+            onClick={clearRecords}
+          >
+            Clear All
+          </Button>
         )}
     </center>
   );
@@ -130,6 +151,7 @@ export default function DetailedInvoiceDisplay(props) {
       </List>
     </Box>
   );
+
   const displaySplitBill = (
     <div>
       {props.currentRecord.expenses ? (
@@ -160,52 +182,62 @@ export default function DetailedInvoiceDisplay(props) {
 
   return (
     <div>
-      <Container sx={{ maxWidth: { xl: 1280 } }}>
-        <Box display="flex" mb={1}>
-          <Box ml={2} flex="1">
-            <Typography variant="h5">{props.currentRecord.invoice}</Typography>
-            <Typography variant="body2">
-              📅{props.currentRecord.date}, ✍
-              {props.currentRecord.author &&
-                props.currentRecord.author.username}
-            </Typography>
-          </Box>
-        </Box>
+      <Container sx={{ maxWidth: { xl: 980 } }}>
+        <Box mt={2}>
+          <Card>
+            <CardContent>
+              <Box display="flex" mb={1}>
+                <Box ml={2} flex="1">
+                  <Typography variant="h5">
+                    {props.currentRecord.invoice}
+                  </Typography>
+                  <Typography variant="body2">
+                    {props.currentRecord.date}, by{"  "}
+                    {props.currentRecord.author &&
+                      props.currentRecord.author.username}
+                  </Typography>
+                </Box>
+              </Box>
 
-        <Box sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Expenses" {...a11yProps(0)} />
-              <Tab
-                label={
-                  props.currentRecord.group &&
-                  props.currentRecord.group.length === 1
-                    ? "1 Member"
-                    : `${props.currentRecord.group.length} Members`
-                }
-                {...a11yProps(1)}
-              />
-              <Tab label="Split Bill" {...a11yProps(2)} />
-            </Tabs>
-          </Box>
+              <Box sx={{ width: "100%" }}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                  <Tabs
+                    value={value}
+                    onChange={handleChange}
+                    aria-label="basic tabs example"
+                  >
+                    <Tab label="Expenses" {...a11yProps(0)} />
+                    <Tab
+                      label={
+                        props.currentRecord.group &&
+                        props.currentRecord.group.length === 1
+                          ? "1 Member"
+                          : `${props.currentRecord.group.length} Members`
+                      }
+                      {...a11yProps(1)}
+                    />
+                    <Tab label="Split Bill" {...a11yProps(2)} />
+                  </Tabs>
+                </Box>
 
-          <TabPanel value={value} index={0}>
-            {editButtons}
-            <br />
-            {displayAllExpenses}
-          </TabPanel>
+                <TabPanel value={value} index={0}>
+                  {addButton}
+                  <br />
+                  {displayAllExpenses}
+                  <br />
+                  {clearAllButton}
+                </TabPanel>
 
-          <TabPanel value={value} index={1}>
-            <ContactsIterator currentRecord={props.currentRecord} />
-          </TabPanel>
+                <TabPanel value={value} index={1}>
+                  <ContactsIterator currentRecord={props.currentRecord} />
+                </TabPanel>
 
-          <TabPanel value={value} index={2}>
-            {displaySplitBill}
-          </TabPanel>
+                <TabPanel value={value} index={2}>
+                  {displaySplitBill}
+                </TabPanel>
+              </Box>
+            </CardContent>
+          </Card>
         </Box>
       </Container>
     </div>
