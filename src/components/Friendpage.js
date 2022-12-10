@@ -1,8 +1,7 @@
-import { DataObjectSharp } from "@mui/icons-material";
 import { onAuthStateChanged } from "firebase/auth";
-import { child, get, update, ref, onValue, set } from "firebase/database";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { child, get, update, ref, onValue } from "firebase/database";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { database, auth, dbRef } from "../firebase";
 import "./Friendpage.css";
 
@@ -94,6 +93,17 @@ export const Friendpage = () => {
   const [numberOfRequests, setNumberOfRequests] = useState(0);
   const [requestList, setRequestList] = useState([]);
   const [requestListUsernames, setRequestListUsernames] = useState([]);
+  const [friendList, setFriendList] = useState([]);
+
+  const getCurrentFriendList = () => {
+    onValue(child(dbRef, `users/${user.uid}/currentFriends`), (snapshot) => {
+      if (snapshot.val()) {
+        setFriendList(snapshot.val());
+      } else {
+        setFriendList([]);
+      }
+    });
+  };
 
   const getCurrentFriendRequests = () => {
     // const requestsRef = dbRef(database, "users/" + user.uid + "/" + "friendRequestFrom")
@@ -103,25 +113,16 @@ export const Friendpage = () => {
     //     setNumberOfRequests(snapshot.val().length)
     // })
     if (user == null) return;
-    get(child(dbRef, `users/${user.uid}/friendRequestFrom`)) //why is this breaking????? i want the below code
-      .then((snapshot) => {
-        if (snapshot.val() != null) {
-          console.log("snap", snapshot.val());
-          setRequestList(snapshot.val());
-
-          setNumberOfRequests(snapshot.val().length);
-        }
-      });
-    // .then(()=>{
-    //     console.log("requestlist",requestList)
-    //     requestList.forEach((uid)=>{
-    //         get(child(dbRef, `users/${uid}/username`))
-    //             .then((username) =>{
-    //                 console.log("username",username)
-    //                 setRequestListUsernames([...requestListUsernames].push(username))
-    //             })
-    //     })
-    // })
+    onValue(child(dbRef, `users/${user.uid}/friendRequestFrom`), (snapshot) => {
+      if (snapshot.val() != null) {
+        console.log("snap", snapshot.val());
+        setRequestList(snapshot.val());
+        setNumberOfRequests(snapshot.val().length);
+      } else {
+        setRequestList([]);
+        setNumberOfRequests(0);
+      }
+    });
   };
 
   useEffect(() => {
@@ -139,6 +140,7 @@ export const Friendpage = () => {
 
   useEffect(() => {
     getCurrentFriendRequests();
+    getCurrentFriendList();
   }, [user]);
 
   useEffect(() => {
@@ -275,6 +277,17 @@ export const Friendpage = () => {
     <>
       <div>
         <h2>Friend List</h2>
+        {friendList.length > 0 && (
+          <ol>
+            {friendList.map((friend) => {
+              return (
+                <li>
+                  {friend.label} {friend.value}
+                </li>
+              );
+            })}
+          </ol>
+        )}
         <button onClick={openAddFriendMenu}>Add Friend</button>
       </div>
 
