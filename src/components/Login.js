@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import "./Login.css"
 
 export const Login = () => {
 
@@ -37,19 +38,26 @@ export const Login = () => {
 
   return (
     <>
-        <h1>Login Page</h1>
+        <div className='background'>
+            <div className='container'>
+                <h1 className='Login'>Login</h1>
 
-        <form onSubmit={(e)=>handleLogin(e)}>
-            <input type={"text"} placeholder={"Email"} onChange={(e)=>{setEmail(e.target.value)}}/>
-            <br/>
-            <input type={"text"} placeholder={"Password"} onChange={(e)=>{setPassword(e.target.value)}}/>
-            <br/>
-            <input type={"submit"}/>
-        </form>
-        <nav>
-            <Link to={"/App"}>to App</Link>
-            <Link to={"/Register"}>Register</Link>
-        </nav>
+                <form onSubmit={(e)=>handleLogin(e)}>
+                    <input className='input-text' type={"text"} placeholder={"Email"} onChange={(e)=>{setEmail(e.target.value)}}/>
+                    <br/>
+                    <input className='input-text' type={"text"} placeholder={"Password"} onChange={(e)=>{setPassword(e.target.value)}}/>
+                    <br/>
+                    <input className='submit' type={"submit"}/>
+                </form>
+                <br/>
+                <nav>
+                    {/* <Link to={"/App"}>to App</Link> */}
+                    <Link  className='register' to={"/Register"}>Register</Link>
+                </nav>
+            </div>
+            
+        </div>
+       
 
     </>
     
