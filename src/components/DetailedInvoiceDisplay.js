@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { ref as databaseRef, remove } from "firebase/database";
-import { database } from "../firebase";
+import { child, get, ref as databaseRef, remove } from "firebase/database";
+import { database, dbRef } from "../firebase";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -22,6 +22,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import { Avatar } from "@mui/material";
 
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
@@ -245,13 +246,38 @@ export default function DetailedInvoiceDisplay(props) {
 }
 
 const ContactsIterator = (props) => {
+  let currentgroup = [...props.currentRecord.group];
+  let allUsers = {};
+  get(child(dbRef, `users`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      allUsers = snapshot.val();
+      console.log(allUsers);
+    } else {
+      console.log("No data avail");
+    }
+    console.log(currentgroup);
+    currentgroup.forEach((element, index) => {
+      let email = element.value;
+      for (const [key, user] of Object.entries(allUsers)) {
+        if (user.email === email) {
+          currentgroup[index]["profilePic"] = user.profilePicture;
+          break;
+        }
+      }
+    });
+  });
+
   return (
     <Box>
       <List>
-        {props.currentRecord.group &&
-          props.currentRecord.group.map((contact) => (
+        {currentgroup &&
+          currentgroup.map((contact) => (
             <ListItem>
-              <ListItemAvatar>pfp</ListItemAvatar>
+              <ListItemAvatar>
+                <Avatar src={contact.profilePic}>
+                  {contact.label.charAt(0).toUpperCase()}
+                </Avatar>
+              </ListItemAvatar>
               <ListItemText
                 primary={`${contact.label}`}
                 secondary={<>{contact.value}</>}
