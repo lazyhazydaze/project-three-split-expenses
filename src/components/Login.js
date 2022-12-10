@@ -10,7 +10,7 @@ export const Login = () => {
         const user = auth.currentUser
         if(user && user.displayName != null){
             console.log("auto routed")
-            navigate("/Homepage")
+            navigate("/")
         }
     },[])// tests
 
@@ -25,7 +25,7 @@ export const Login = () => {
         signInWithEmailAndPassword(auth,email,password)
             .then((userCredential)=>{
                 console.log("Login page navigated")
-                navigate("/Homepage")
+                navigate("/")
             })
             .catch((error)=>{
                 const errorCode = error.code;

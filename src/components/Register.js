@@ -77,7 +77,7 @@ export const Register = () => {
                 <input type={"text"} placeholder={"password here"} onChange={(e)=>{setPassword(e.target.value)}}/>
                 <br/>
                 <input type={"submit"}/>
-                <span style={error==""?{display:"none"}:{display:"block", color:"red"}}>{`${error}`}</span>
+                <span style={error===""?{display:"none"}:{display:"block", color:"red"}}>{`${error}`}</span>
             </form>
 
             

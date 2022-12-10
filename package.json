@@ -1,7 +1,7 @@
 {
   "name": "project1-bootcamp",
   "version": "0.1.0",
-  "homepage": "https://lazyhazydaze.github.io/project1-bootcamp/",
+  "homepage": "https://lazyhazydaze.github.io/",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",

@@ -8,6 +8,7 @@
 
 # testing
 /coverage
+src/components/testinggg.js
 
 # production
 /build

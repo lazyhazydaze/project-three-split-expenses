@@ -1,7 +1,7 @@
-import { onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
-import React, {useEffect, useRef, useState } from "react";
-import { auth, database, storage, } from "../firebase";
-import { useNavigate, } from "react-router-dom";
+import { onAuthStateChanged, updateProfile } from "firebase/auth";
+import React, { useEffect, useRef, useState } from "react";
+import { auth, database, storage } from "../firebase";
+import { useNavigate } from "react-router-dom";
 import { ref, update } from "firebase/database";
 import {
   getDownloadURL,
@@ -17,23 +17,16 @@ export const UserProfile = () => {
   const [user, setUser] = useState("");
   // const user = useContext(UserContext) // shit doesnt persist across page refresh
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // console.log("homepage",user)
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log("logged in")
         setUsername(user.displayName);
         setEmail(user.email);
         setPhotoURL(user.photoURL);
         setUser(auth.currentUser);
       } else {
-        // console.log("not logged in")
-        // unsubAuthStateChanged()
         navigate("/Login");
       }
     });
-    return () => {
-      unsubscribe();
-    };
   }, []); //run once on render
 
   // const unsubAuthStateChanged = onAuthStateChanged(auth,(user)=>{
@@ -55,17 +48,6 @@ export const UserProfile = () => {
   // useEffect(()=>{
   //     setUnsub(unsubAuthStateChanged)
   // },[unsubAuthStateChanged])
-
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        // unsubAuthStateChanged()
-        navigate("/Login");
-      })
-      .catch((error) => {
-        console.log("sign out fail", error);
-      });
-  };
 
   const navigate = useNavigate();
 
@@ -131,39 +113,38 @@ export const UserProfile = () => {
     });
   };
 
-  const [newUsername, setNewUsername]=useState("")
+  const [newUsername, setNewUsername] = useState("");
 
-  const editusernamewindow = useRef()
+  const editusernamewindow = useRef();
   const openEditUsername = () => {
-    const editusernamewindowref = editusernamewindow.current
-    editusernamewindowref.classList.add("display")
+    const editusernamewindowref = editusernamewindow.current;
+    editusernamewindowref.classList.add("display");
   };
   const closeEditUsername = () => {
-    const editusernamewindowref = editusernamewindow.current
-    editusernamewindowref.classList.remove("display")
-  }
+    const editusernamewindowref = editusernamewindow.current;
+    editusernamewindowref.classList.remove("display");
+  };
 
-  const editUsername = (e) =>{
-    e.preventDefault()
-    if(newUsername.length==0)return
+  const editUsername = (e) => {
+    e.preventDefault();
+    if (newUsername.length == 0) return;
 
-    const updates = {}
-    updates[`users/${user.uid}/username`] = newUsername
-    update(ref(database),updates)
+    const updates = {};
+    updates[`users/${user.uid}/username`] = newUsername;
+    update(ref(database), updates);
 
     updateProfile(auth.currentUser, {
-      displayName: newUsername
-    })
+      displayName: newUsername,
+    });
 
-    closeEditProfile()
-    closeEditUsername()
-  }
+    closeEditProfile();
+    closeEditUsername();
+  };
 
   return (
     <>
       <div style={{ postion: "fixed" }}>
         {/* Why does this trigger Register.js createUsername() function????????? */}
-        <button onClick={handleLogout}>Logout</button>
 
         <div>
           <img
@@ -179,7 +160,9 @@ export const UserProfile = () => {
 
         <div ref={popupwindow} className={"popup"}>
           <div className="popup_content">
-            <span className="close" onClick={closeEditProfile}>&times;</span>
+            <span className="close" onClick={closeEditProfile}>
+              &times;
+            </span>
             <div className="pfpdiv">
               <img
                 onClick={displayUploadImageForm}
@@ -190,10 +173,9 @@ export const UserProfile = () => {
                     : `${photoURL}`
                 }
               />
-             
             </div>
             <div className={"pfpdivbutton"}>
-            <button
+              <button
                 style={
                   photoURL == null ? { display: "none" } : { display: "block" }
                 }
@@ -202,16 +184,14 @@ export const UserProfile = () => {
                 Remove picture
               </button>
             </div>
-            
-            
+
             {/* <br /> */}
             <p className="friendid">Your friendID: {`${user.uid}`}</p>
-            
+
             <span>Username: {`${username}`}</span>
             <span className="edit" onClick={openEditUsername}>
               Edit
             </span>
-            
 
             <p>Registered Email: {`${email}`}</p>
 
@@ -232,14 +212,24 @@ export const UserProfile = () => {
             </div>
 
             <div ref={editusernamewindow} className={"editusernamewindow"}>
-                Input new username
-                <span className="close" onClick={closeEditUsername}>&times;</span>
-                  <form onSubmit={(e)=>{editUsername(e)}}>
-                    <input type={"text"} onChange={(e)=>{setNewUsername(e.target.value)}}></input>
-                    <input type={"submit"}></input>
-                  </form>
+              Input new username
+              <span className="close" onClick={closeEditUsername}>
+                &times;
+              </span>
+              <form
+                onSubmit={(e) => {
+                  editUsername(e);
+                }}
+              >
+                <input
+                  type={"text"}
+                  onChange={(e) => {
+                    setNewUsername(e.target.value);
+                  }}
+                ></input>
+                <input type={"submit"}></input>
+              </form>
             </div>
-            
           </div>
         </div>
       </div>

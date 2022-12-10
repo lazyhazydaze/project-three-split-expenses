@@ -26,21 +26,15 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        let dontbeconfusedhazelle = auth.currentUser;
-        setCurrentUser(dontbeconfusedhazelle);
-        // console.log("logged in")
-        // console.log("dashboard",user)
+        setCurrentUser(auth.currentUser);
       } else {
-        // console.log("not logged in")
+        setCurrentUser(null);
         navigate("/Login");
       }
-      return () => {
-        unsubscribe();
-      };
     });
-  }, []); //run once on render
+  }, [currentUser]); //run once on render
 
   // const [currentUser, setCurrentUser] = useState({
   //   username: user? user.displayName : "thing",
@@ -140,12 +134,10 @@ export default function App() {
               />
             }
           />
-
           <Route
             path="invoices/createinvoice"
             element={<InvoiceForm currentUser={currentUser} />}
           />
-
           <Route path="userprofile" element={<UserProfile />} />
 
           <Route

@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
 // @mui
 import { alpha } from "@mui/material/styles";
 import {
@@ -12,34 +15,42 @@ import {
   Popover,
 } from "@mui/material";
 
-// ----------------------------------------------------------------------
-const account = {
-  displayName: "Hazelle Lim",
-  email: "hazelle@email.com",
-  photoURL: "/assets/images/avatars/avatar_default.jpg",
-};
-
-const MENU_OPTIONS = [
-  {
-    label: "Edit Profile",
-  },
-  {
-    label: "Logout",
-  },
-];
-
-// ----------------------------------------------------------------------
-
 export default function AccountPopover(props) {
   const [open, setOpen] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
+  const handleLogout = () => {
+    setOpen(null);
+    signOut(auth)
+      .then(() => {
+        navigate("/Login");
+        console.log("logout");
+      })
+      .catch((error) => {
+        console.log("sign out fail", error);
+      });
+  };
+
   const handleClose = () => {
     setOpen(null);
+    navigate("/userprofile");
   };
+
+  const MENU_OPTIONS = [
+    {
+      label: "Edit Profile",
+      action: handleClose,
+    },
+    {
+      label: "Logout",
+      action: handleLogout,
+    },
+  ];
 
   return (
     <>
@@ -60,7 +71,7 @@ export default function AccountPopover(props) {
           }),
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar src={props.pfp} alt="photoURL" />
       </IconButton>
 
       <Popover
@@ -95,7 +106,7 @@ export default function AccountPopover(props) {
 
         <Stack sx={{ p: 1 }}>
           {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={handleClose}>
+            <MenuItem key={option.label} onClick={option.action}>
               {option.label}
             </MenuItem>
           ))}

@@ -74,6 +74,11 @@ export default function Header(props) {
                   <AccountPopover
                     displayName={props.currentUser.displayName}
                     email={props.currentUser.email}
+                    pfp={
+                      props.currentUser.profilePicture
+                        ? props.currentUser.profilePicture
+                        : ""
+                    }
                   />
                 </Stack>
               </Box>
@@ -81,17 +86,6 @@ export default function Header(props) {
           </Toolbar>
         </AppBar>
       </Box>
-
-      {/* <Link to="/friendpage">
-            <button>Add/View Friends</button>
-          </Link>
-          
-          <Link to="/userprofile">
-            <button>Edit Profile</button>
-          </Link>
-          <br />
-          <Link to="/">Return back to Homepage</Link>
-        */}
 
       <Outlet />
     </div>
