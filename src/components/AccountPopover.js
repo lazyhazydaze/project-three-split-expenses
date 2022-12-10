@@ -29,7 +29,6 @@ export default function AccountPopover(props) {
     signOut(auth)
       .then(() => {
         navigate("/Login");
-        console.log("logout");
       })
       .catch((error) => {
         console.log("sign out fail", error);
@@ -43,7 +42,7 @@ export default function AccountPopover(props) {
 
   const MENU_OPTIONS = [
     {
-      label: "Edit Profile",
+      label: "Profile Page",
       action: handleClose,
     },
     {
@@ -77,7 +76,7 @@ export default function AccountPopover(props) {
       <Popover
         open={Boolean(open)}
         anchorEl={open}
-        onClose={handleClose}
+        onClose={() => setOpen(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         PaperProps={{
