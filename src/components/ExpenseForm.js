@@ -45,7 +45,7 @@ export default function ExpenseForm(props) {
         <FormControl required sx={{ m: 2, width: "80ch" }} variant="standard">
           <InputLabel>Item Name</InputLabel>
           <Input
-            required={true}
+            required
             value={item}
             onChange={({ target }) => setItem(target.value)}
             startAdornment={
@@ -58,7 +58,7 @@ export default function ExpenseForm(props) {
         <FormControl required sx={{ m: 2, width: "80ch" }} variant="standard">
           <InputLabel>Amount</InputLabel>
           <Input
-            required={true}
+            required
             value={amount}
             onChange={({ target }) => setAmount(target.value)}
             startAdornment={<InputAdornment position="start">$</InputAdornment>}

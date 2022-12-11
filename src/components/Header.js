@@ -66,16 +66,16 @@ export default function Header(props) {
                 >
                   {/* <Tab label={"Homepage"} component={Link} to="/" value="/" /> */}
                   <Tab
-                    label={"Contacts"}
-                    component={Link}
-                    to="/contacts"
-                    value="/contacts"
-                  />
-                  <Tab
                     label={"Invoices"}
                     component={Link}
                     to="/invoices"
                     value="/invoices"
+                  />
+                  <Tab
+                    label={"Contacts"}
+                    component={Link}
+                    to="/contacts"
+                    value="/contacts"
                   />
                 </Tabs>
               </Box>
