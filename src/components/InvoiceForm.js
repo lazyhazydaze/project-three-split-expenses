@@ -130,7 +130,7 @@ export default function InvoiceForm(props) {
     e.preventDefault();
     if (activeStep === 0) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else if (activeStep === 1 && !titleError) {
+    } else if (activeStep === 1 && !titleError && date && date.isValid()) {
       const dbRef = push(databaseRef(database, "invoice"));
       set(dbRef, {
         invoice,
@@ -160,7 +160,11 @@ export default function InvoiceForm(props) {
   };
 
   const step1 = (
-    <FormControl required sx={{ my: 4, width: "100%" }} variant="standard">
+    <FormControl
+      required
+      sx={{ mt: 4, mb: 30, width: "100%" }}
+      variant="standard"
+    >
       <Select
         closeMenuOnSelect={false}
         options={combinedContactList}
@@ -213,7 +217,7 @@ export default function InvoiceForm(props) {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DesktopDatePicker
           label="Date*"
-          inputFormat="MM/DD/YYYY"
+          inputFormat="DD/MM/YYYY"
           value={date}
           onChange={(newValue) => setDate(newValue)}
           renderInput={(params) => <TextField {...params} />}
