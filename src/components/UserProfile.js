@@ -161,7 +161,7 @@ export const UserProfile = () => {
     <>
       <div style={{ postion: "fixed" }}>
         {/* Why does this trigger Register.js createUsername() function????????? */}
-        <button onClick={handleLogout}>Logout</button>
+        {/* <button onClick={handleLogout}>Logout</button>
 
         <div>
           <img
@@ -173,45 +173,57 @@ export const UserProfile = () => {
           />
           <h2>Hello {`${username}`}</h2>
           <button onClick={editProfile}>show profile</button>
-        </div>
+        </div> */}
 
         <div ref={popupwindow} className={"popup"}>
           <div className="popup_content">
-            <span className="close" onClick={closeEditProfile}>&times;</span>
-            <div className="pfpdiv">
-              <img
-                onClick={displayUploadImageForm}
-                className="pfp"
-                src={
-                  photoURL == null
-                    ? "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
-                    : `${photoURL}`
-                }
-              />
-             
+            {/* <span className="close" onClick={closeEditProfile}>&times;</span> */}
+            <div>
+              <div className="pfpdiv">
+                <img
+                  onClick={displayUploadImageForm}
+                  className="pfp"
+                  src={
+                    photoURL == null
+                      ? "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
+                      : `${photoURL}`
+                  }
+                />
+              
+              </div>
+              <div className={"pfpdivbutton"}>
+              <button
+                  style={
+                    photoURL == null ? { display: "none" } : { display: "block" }
+                  }
+                  onClick={removeProfilePicture}
+                >
+                  Remove picture
+                </button>
+              </div>
             </div>
-            <div className={"pfpdivbutton"}>
-            <button
-                style={
-                  photoURL == null ? { display: "none" } : { display: "block" }
-                }
-                onClick={removeProfilePicture}
-              >
-                Remove picture
-              </button>
-            </div>
+           
             
             
             {/* <br /> */}
             <p className="friendid">Your friendID: {`${user.uid}`}</p>
             
-            <span>Username: {`${username}`}</span>
-            <span className="edit" onClick={openEditUsername}>
-              Edit
-            </span>
+            <div>
+              <span>Username: {`${username}`}</span>
+              <img src="https://www.freeiconspng.com/thumbs/edit-icon-png/edit-new-icon-22.png" className="edit" onClick={openEditUsername}/>
+            </div>
+
+            <div ref={editusernamewindow} className={"editusernamewindow"}>
+                Input new username
+                <span className="close" onClick={closeEditUsername}>&times;</span>
+                  <form onSubmit={(e)=>{editUsername(e)}}>
+                    <input type={"text"} onChange={(e)=>{setNewUsername(e.target.value)}}></input>
+                    <input type={"submit"}></input>
+                  </form>
+            </div>
             
 
-            <p>Registered Email: {`${email}`}</p>
+            <p className="email">Registered Email: {`${email}`}</p>
 
             <div ref={uploadimagewindow} className={"uploadImageForm"}>
               <span>choose your picture</span>
@@ -229,14 +241,7 @@ export const UserProfile = () => {
               </form>
             </div>
 
-            <div ref={editusernamewindow} className={"editusernamewindow"}>
-                Input new username
-                <span className="close" onClick={closeEditUsername}>&times;</span>
-                  <form onSubmit={(e)=>{editUsername(e)}}>
-                    <input type={"text"} onChange={(e)=>{setNewUsername(e.target.value)}}></input>
-                    <input type={"submit"}></input>
-                  </form>
-            </div>
+            
             
           </div>
         </div>
