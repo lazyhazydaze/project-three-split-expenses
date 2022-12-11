@@ -3,9 +3,17 @@
 } */
 
 img{
-    max-width: 100px;
-    max-height: 100px;
+    max-width: 250px;
+    max-height: 250px;
     border-radius: 50%;
+}
+
+p{
+  font-size: 20px;
+}
+
+span{
+  font-size: 20px;
 }
 
 .hidden{
@@ -13,24 +21,24 @@ img{
 }
 
 .popup{
-    display: none;
-    position: absolute;
+    display: block;
+    /* position: absolute; */
     top: 0%;
     z-index: 1;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.50);
+    /* background-color: rgba(0, 0, 0, 0.50); */
 }
 
 .popup_content {
-    background-color: white;
+    /* background-color: white; */
     position: relative;
     top: 20%;
     left: 30%;
     width: 40%;
     padding: 20px;
-    border-radius: 5px;
-    border: 2px solid black;
+    /* border-radius: 5px; */
+    /* border: 2px solid black; */
   }
 
   .close{
@@ -43,7 +51,9 @@ img{
   }
 
   .edit{
-    float: right;
+    margin-left: 10px;
+    max-width: 15px;
+    max-height: 15px;
   }
 
   .edit:hover{
@@ -106,11 +116,12 @@ img{
   background-color: white;
   position: relative;
   top: 20%;
-  left: 30%;
+  /* left: 30%; */
   width: 40%;
   padding: 20px;
   border-radius: 5px;
   border: 2px solid black;
+  margin-top: 20px;
 }
 
 .editusernamewindow.display {
@@ -118,5 +129,10 @@ img{
 }
 
 .friendid {
+  margin-top: 20px;
   color: rgb(174, 174, 174);
+}
+
+.email{
+  margin-top: 20px;
 }

@@ -1,18 +1,9 @@
+*{
+    margin-top: 0px;
+}
+
 input{
     margin-top: 25px;
-}
-
-
-.hideDisplay{
-    display: none;
-    transition: ease-in-out 1s;
-    opacity: 1;
-}
-
-.showDisplay{
-    display: block; 
-    transition: ease-in-out 1s;
-    opacity: 1;
 }
 
 .background{
@@ -33,6 +24,11 @@ input{
     background-color: aliceblue;
     position: absolute;
     top: 25%;
+}
+
+.Login{
+    display: flex;
+    justify-content: center;
 }
 
 .input-text{
@@ -66,10 +62,11 @@ input{
   .submit:active {
     background-color: #06b;
   }
+  
 
-  .back {
+  .register{
     text-decoration: none;
+    margin-top: 20px;
+    font-size: 20px;
     color: rgb(55, 98, 117);
   }
-
-  

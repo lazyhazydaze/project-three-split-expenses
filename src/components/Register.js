@@ -11,7 +11,7 @@ export const Register = () => {
     //logic states
     const [email,setEmail] = useState("")
     const [password,setPassword] = useState("")
-    const [username,setUsername] = useState("")
+    const [username,setUsername] = useState("User")
 
     //css states
     const [display1,setDisplay1] = useState("showDisplay")
@@ -70,25 +70,33 @@ export const Register = () => {
 
   return (
     <>
-        <h1>Register Page</h1>
-        
-            <form onSubmit={(e)=>handleRegister(e)} className={`${display1}`}>
-                <input type={"text"} placeholder={"email here"} onChange={(e)=>{setEmail(e.target.value)}}/>
-                <input type={"text"} placeholder={"password here"} onChange={(e)=>{setPassword(e.target.value)}}/>
-                <br/>
-                <input type={"submit"}/>
-                <span style={error===""?{display:"none"}:{display:"block", color:"red"}}>{`${error}`}</span>
-            </form>
+        <div className='background'>
+            <div className='container'>
+                <h1 className='Login'>Register</h1>
+                
+                    <form onSubmit={(e)=>handleRegister(e)} className={`${display1}`}>
+                        <input className='input-text' type={"text"} placeholder={"email here"} onChange={(e)=>{setEmail(e.target.value)}}/>
+                        <br/>
+                        <input className='input-text' type={"text"} placeholder={"password here"} onChange={(e)=>{setPassword(e.target.value)}}/>
+                        <br/>
+                        <input className='submit' type={"submit"}/>
+                        <span style={error==""?{display:"none"}:{display:"block", color:"red"}}>{`${error}`}</span>
+                    </form>
 
+                    
+                    <form onSubmit={(e)=>createUsername(e)} className={`${display2}`}>
+                        <input className='input-text' type={"text"} placeholder={"username here"} onChange={(e)=>{setUsername(e.target.value)}}/>
+                        <br/>
+                        <input className='submit' type={"submit"}/>
+                    </form>
+                    <br/>
+                <nav>
+                    <Link className='back' to={"/Login"}>Back to Login</Link>
+                </nav>
+            </div>
             
-            <form onSubmit={(e)=>createUsername(e)} className={`${display2}`}>
-                <input type={"text"} placeholder={"username here"} onChange={(e)=>{setUsername(e.target.value)}}/>
-                <br/>
-                <input type={"submit"}/>
-            </form>
-        <nav>
-            <Link to={"/"}>Back to Home</Link>
-        </nav>
+        </div>
+        
     </>
   )
 }
