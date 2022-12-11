@@ -41,20 +41,7 @@ export const UserProfile = () => {
 
   const navigate = useNavigate();
 
-  const popupwindow = useRef();
   const uploadimagewindow = useRef();
-
-  const editProfile = () => {
-    //popup windows to be show for editing of profile
-    // can edit username and profile pic
-    const popupwindowref = popupwindow.current;
-    popupwindowref.style.display = "block";
-  };
-
-  const closeEditProfile = () => {
-    const popupwindowref = popupwindow.current;
-    popupwindowref.style.display = "none";
-  };
 
   const displayUploadImageForm = () => {
     const uploadimagewindowref = uploadimagewindow.current;
@@ -89,7 +76,6 @@ export const UserProfile = () => {
           })
           .then(() => {
             closeUploadImageForm();
-            closeEditProfile();
             setPhotoName("");
           });
         // })
@@ -127,8 +113,6 @@ export const UserProfile = () => {
     updateProfile(auth.currentUser, {
       displayName: newUsername,
     });
-
-    closeEditProfile();
     closeEditUsername();
   };
 
@@ -137,19 +121,7 @@ export const UserProfile = () => {
       <div style={{ postion: "fixed" }}>
         {/* Why does this trigger Register.js createUsername() function????????? */}
 
-        <div>
-          <img
-            src={
-              photoURL
-                ? `${photoURL}`
-                : "https://media.istockphoto.com/id/1214428300/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=vftMdLhldDx9houN4V-g3C9k0xl6YeBcoB_Rk6Trce0="
-            }
-          />
-          <h2>Hello {`${username}`}</h2>
-          <button onClick={editProfile}>show profile</button>
-        </div> */}
-
-        <div ref={popupwindow} className={"popup"}>
+        <div className={"popup"}>
           <div className="popup_content">
             {/* <span className="close" onClick={closeEditProfile}>&times;</span> */}
             <div>
@@ -163,12 +135,13 @@ export const UserProfile = () => {
                       : `${photoURL}`
                   }
                 />
-              
               </div>
               <div className={"pfpdivbutton"}>
-              <button
+                <button
                   style={
-                    photoURL == null ? { display: "none" } : { display: "block" }
+                    photoURL == null
+                      ? { display: "none" }
+                      : { display: "block" }
                   }
                   onClick={removeProfilePicture}
                 >
@@ -176,27 +149,37 @@ export const UserProfile = () => {
                 </button>
               </div>
             </div>
-           
-            
-            
+
             {/* <br /> */}
             <p className="friendid">Your friendID: {`${user.uid}`}</p>
-            
+
             <div>
               <span>Username: {`${username}`}</span>
-              <img src="https://www.freeiconspng.com/thumbs/edit-icon-png/edit-new-icon-22.png" className="edit" onClick={openEditUsername}/>
+              <img
+                src="https://www.freeiconspng.com/thumbs/edit-icon-png/edit-new-icon-22.png"
+                className="edit"
+                onClick={openEditUsername}
+              />
             </div>
-
             <div ref={editusernamewindow} className={"editusernamewindow"}>
-                Input new username
-                <span className="close" onClick={closeEditUsername}>&times;</span>
-                  <form onSubmit={(e)=>{editUsername(e)}}>
-                    <input type={"text"} onChange={(e)=>{setNewUsername(e.target.value)}}></input>
-                    <input type={"submit"}></input>
-                  </form>
+              Input new username
+              <span className="close" onClick={closeEditUsername}>
+                &times;
+              </span>
+              <form
+                onSubmit={(e) => {
+                  editUsername(e);
+                }}
+              >
+                <input
+                  type={"text"}
+                  onChange={(e) => {
+                    setNewUsername(e.target.value);
+                  }}
+                ></input>
+                <input type={"submit"}></input>
+              </form>
             </div>
-            
-
             <p className="email">Registered Email: {`${email}`}</p>
 
             <div ref={uploadimagewindow} className={"uploadImageForm"}>
@@ -218,26 +201,6 @@ export const UserProfile = () => {
                   value={photoName}
                 />
                 <input type={"submit"} />
-              </form>
-            </div>
-
-            <div ref={editusernamewindow} className={"editusernamewindow"}>
-              Input new username
-              <span className="close" onClick={closeEditUsername}>
-                &times;
-              </span>
-              <form
-                onSubmit={(e) => {
-                  editUsername(e);
-                }}
-              >
-                <input
-                  type={"text"}
-                  onChange={(e) => {
-                    setNewUsername(e.target.value);
-                  }}
-                ></input>
-                <input type={"submit"}></input>
               </form>
             </div>
           </div>
