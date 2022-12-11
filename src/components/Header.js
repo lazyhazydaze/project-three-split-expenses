@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Tabs,
   Tab,
@@ -10,16 +10,33 @@ import {
 } from "@mui/material";
 import { Outlet, Link, matchPath, useLocation } from "react-router-dom";
 import AccountPopover from "./AccountPopover";
+import { child, onValue } from "firebase/database";
+import { dbRef } from "../firebase";
 
 export default function Header(props) {
   const location = useLocation();
 
-  let currentPath = "/";
+  const [photoURL, setPhotoURL] = useState(null);
+
+  let currentPath = "/invoices";
   if (!!matchPath("/contacts/*", location.pathname)) {
     currentPath = "/contacts";
   } else if (!!matchPath("/invoices/*", location.pathname)) {
     currentPath = "/invoices";
   }
+
+  useEffect(() => {
+    onValue(
+      child(dbRef, `users/${props.currentUser.uid}/profilePicture`),
+      (snapshot) => {
+        if (snapshot.val()) {
+          setPhotoURL(snapshot.val());
+        } else {
+          setPhotoURL(null);
+        }
+      }
+    );
+  }, [props.currentUser]);
 
   return (
     <div>
@@ -47,18 +64,18 @@ export default function Header(props) {
                   indicatorColor="secondary"
                   textColor="inherit"
                 >
-                  <Tab label={"Homepage"} component={Link} to="/" value="/" />
-                  <Tab
-                    label={"Contacts"}
-                    component={Link}
-                    to="/contacts"
-                    value="/contacts"
-                  />
+                  {/* <Tab label={"Homepage"} component={Link} to="/" value="/" /> */}
                   <Tab
                     label={"Invoices"}
                     component={Link}
                     to="/invoices"
                     value="/invoices"
+                  />
+                  <Tab
+                    label={"Contacts"}
+                    component={Link}
+                    to="/contacts"
+                    value="/contacts"
                   />
                 </Tabs>
               </Box>
@@ -74,6 +91,7 @@ export default function Header(props) {
                   <AccountPopover
                     displayName={props.currentUser.displayName}
                     email={props.currentUser.email}
+                    pfp={photoURL ? photoURL : ""}
                   />
                 </Stack>
               </Box>
@@ -81,17 +99,6 @@ export default function Header(props) {
           </Toolbar>
         </AppBar>
       </Box>
-
-      {/* <Link to="/friendpage">
-            <button>Add/View Friends</button>
-          </Link>
-          
-          <Link to="/userprofile">
-            <button>Edit Profile</button>
-          </Link>
-          <br />
-          <Link to="/">Return back to Homepage</Link>
-        */}
 
       <Outlet />
     </div>

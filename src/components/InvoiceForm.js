@@ -19,11 +19,9 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Container } from "@mui/material";
+import { Card, CardContent, Container, FormControl } from "@mui/material";
 
-const steps = ["Add Group", "Name Invoice"];
-
-const captions = ["Who is splitting with you?", "Name and date your invoice"];
+const steps = ["Add Group", "Add Title & Date"];
 
 export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
@@ -67,6 +65,26 @@ export default function InvoiceForm(props) {
     },
   ]);
 
+  const [titleError, setTitleError] = useState(true);
+  const [titleErrorMessage, setTitleErrorMessage] = useState(
+    "Field cannot be blank."
+  );
+
+  const validateTitle = (titleValue) => {
+    if (titleValue === "") {
+      setTitleError(true);
+      setTitleErrorMessage("Field cannot be blank.");
+    } else if (titleValue.length > 30) {
+      setTitleError(true);
+      setTitleErrorMessage(
+        `Max 30 char (Current: ${titleValue.length} char). `
+      );
+    } else {
+      setTitleError(false);
+    }
+    setInvoice(titleValue);
+  };
+
   const [combinedContactList, setCombinedContactList] = useState([]);
   // let combinedContactList = []
 
@@ -108,8 +126,11 @@ export default function InvoiceForm(props) {
   const [activeStep, setActiveStep] = useState(0);
 
   // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
-  const handleNext = () => {
-    if (activeStep === 1) {
+  const handleNext = (e) => {
+    e.preventDefault();
+    if (activeStep === 0) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } else if (activeStep === 1 && !titleError) {
       const dbRef = push(databaseRef(database, "invoice"));
       set(dbRef, {
         invoice,
@@ -126,8 +147,8 @@ export default function InvoiceForm(props) {
           isFixed: true,
         },
       ]);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
@@ -139,10 +160,10 @@ export default function InvoiceForm(props) {
   };
 
   const step1 = (
-    <div className="dropdown-container">
+    <FormControl required sx={{ my: 4, width: "100%" }} variant="standard">
       <Select
+        closeMenuOnSelect={false}
         options={combinedContactList}
-        placeholder="Select Name"
         value={selectedFriends}
         defaultValue={combinedContactList[0]}
         onChange={setSelectedFriends}
@@ -169,80 +190,91 @@ export default function InvoiceForm(props) {
           },
         }}
       />
-    </div>
+    </FormControl>
   );
 
   const step2 = (
-    <span>
-      <input
-        type="text"
-        name="invoice"
-        value={invoice}
-        placeholder="Enter Invoice Name"
-        onChange={({ target }) => setInvoice(target.value)}
+    <Box
+      sx={{
+        mt: 5,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+      }}
+    >
+      <TextField
         required
+        label="Title"
+        value={invoice}
+        onChange={({ target }) => validateTitle(target.value)}
+        error={titleError}
+        helperText={titleError && titleErrorMessage}
       />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DesktopDatePicker
-          label="Date"
+          label="Date*"
           inputFormat="MM/DD/YYYY"
           value={date}
           onChange={(newValue) => setDate(newValue)}
           renderInput={(params) => <TextField {...params} />}
         />
       </LocalizationProvider>
-    </span>
+    </Box>
   );
 
   const stepForm = [step1, step2];
 
   return (
-    <Container sx={{ maxWidth: { xl: 600 } }}>
-      <Box sx={{ width: "100%" }}>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label, index) => {
-            const stepProps = {};
-            const labelProps = {};
+    <Container sx={{ maxWidth: { xl: 800 } }}>
+      <Box my={10}>
+        <Card>
+          <CardContent>
+            <Stepper activeStep={activeStep}>
+              {steps.map((label, index) => {
+                const stepProps = {};
+                const labelProps = {};
 
-            return (
-              <Step key={label} {...stepProps}>
-                <StepLabel {...labelProps}>{label}</StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
-        {activeStep === steps.length ? (
-          <React.Fragment>
-            <Typography sx={{ mt: 2, mb: 1 }}>
-              Invoice created! Click on Invoices to edit the record.
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Box sx={{ flex: "1 1 auto" }} />
-              <Button onClick={handleReset}>Create another</Button>
-            </Box>
-          </React.Fragment>
-        ) : (
-          <React.Fragment>
-            <Typography sx={{ mt: 2, mb: 1 }}>
-              {captions[activeStep]} <br /> {stepForm[activeStep]}
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Button
-                color="inherit"
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                sx={{ mr: 1 }}
-              >
-                Back
-              </Button>
-              <Box sx={{ flex: "1 1 auto" }} />
+                return (
+                  <Step key={label} {...stepProps}>
+                    <StepLabel {...labelProps}>{label}</StepLabel>
+                  </Step>
+                );
+              })}
+            </Stepper>
+            {activeStep === steps.length ? (
+              <React.Fragment>
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                  Invoice created! Click on Invoices to edit the record.
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                  <Box sx={{ flex: "1 1 auto" }} />
+                  <Button onClick={handleReset}>Create another</Button>
+                </Box>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                  {stepForm[activeStep]}
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                  <Button
+                    color="inherit"
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    sx={{ mr: 1 }}
+                  >
+                    Back
+                  </Button>
+                  <Box sx={{ flex: "1 1 auto" }} />
 
-              <Button onClick={handleNext}>
-                {activeStep === steps.length - 1 ? "Submit" : "Next"}
-              </Button>
-            </Box>
-          </React.Fragment>
-        )}
+                  <Button onClick={handleNext}>
+                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                  </Button>
+                </Box>
+              </React.Fragment>
+            )}
+          </CardContent>
+        </Card>
       </Box>
     </Container>
   );

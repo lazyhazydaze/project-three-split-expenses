@@ -4,6 +4,8 @@ import { database } from "../firebase";
 import { Paper, Typography, Link as MuiLink, Box } from "@mui/material";
 import ContactsIcon from "@mui/icons-material/AccountCircle";
 import { Link } from "react-router-dom";
+import ClearIcon from "@mui/icons-material/Clear";
+import IconButton from "@mui/material/IconButton";
 
 export default function InvoiceCard(props) {
   const [elevation, setElevation] = useState(1);
@@ -58,9 +60,17 @@ export default function InvoiceCard(props) {
           </Box>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {props.deleterights && (
-              <button value={props.expensekey} onClick={deleteInvoice}>
-                ✖
-              </button>
+              // <button value={props.expensekey} onClick={deleteInvoice}>
+              //   ✖
+              // </button>
+              <IconButton
+                aria-label="delete"
+                value={props.expensekey}
+                onClick={deleteInvoice}
+                size="small"
+              >
+                <ClearIcon fontSize="inherit" />
+              </IconButton>
             )}
           </Box>
         </Box>

@@ -8,6 +8,8 @@
 
 # testing
 /coverage
+src/components/testinggg.js
+src/components/Homepage.js
 
 # production
 /build
