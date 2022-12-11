@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ref as databaseRef, onValue } from "firebase/database";
-import { database } from "../firebase";
+import { auth, database } from "../firebase";
 import InvoiceCard from "./InvoiceCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Box, Container, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { onAuthStateChanged } from "firebase/auth";
 
 //to retrieve and display the invoices onto the homepage
 //properties currentUser and setCurrentRecordListener are passed from App.js
@@ -39,6 +40,16 @@ export default function InvoiceRetrieve(props) {
     }
     setFilteredInvoiceList(filteredInvoice);
   }, [invoiceList, props.currentUser]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/Login");
+      }
+    });
+  }, []);
 
   return (
     <Container sx={{ maxWidth: { xl: 1280 } }}>

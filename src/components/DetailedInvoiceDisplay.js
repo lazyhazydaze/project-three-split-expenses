@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { child, get, ref as databaseRef, remove } from "firebase/database";
 import { database, dbRef } from "../firebase";
 import Button from "@mui/material/Button";
@@ -29,6 +29,7 @@ import { Avatar } from "@mui/material";
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
+import { useNavigate } from "react-router-dom";
 
 /****************************************************************/
 function TabPanel(props) {
@@ -69,6 +70,14 @@ export default function DetailedInvoiceDisplay(props) {
   const [open, setOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [value, setValue] = useState(0);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!props.currentRecord.group) {
+      navigate("/invoices");
+    }
+  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -254,9 +263,10 @@ export default function DetailedInvoiceDisplay(props) {
                     <Tab
                       label={
                         props.currentRecord.group &&
-                        props.currentRecord.group.length === 1
+                        props.currentRecord.group.length &&
+                        (props.currentRecord.group.length === 1
                           ? "1 Member"
-                          : `${props.currentRecord.group.length} Members`
+                          : `${props.currentRecord.group.length} Members`)
                       }
                       {...a11yProps(1)}
                     />
