@@ -159,7 +159,7 @@ export const UserProfile = () => {
 
   return (
     <>
-      <div style={{ postion: "fixed" }}>
+      <div className="background-container" style={{ postion: "fixed" }}>
         {/* Why does this trigger Register.js createUsername() function????????? */}
         {/* <button onClick={handleLogout}>Logout</button>
 
