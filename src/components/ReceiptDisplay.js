@@ -98,7 +98,7 @@ function AcccessibleTable(props) {
               <TableCell component="th" scope="row">
                 {row.item}
               </TableCell>
-              <TableCell align="right">{row.cost}</TableCell>
+              <TableCell align="right">{row.cost.toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
