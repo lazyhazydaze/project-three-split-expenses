@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Box, Container } from "@mui/material";
 import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "../firebase";
 import InvoiceCard from "./InvoiceCard";
 import { Link } from "react-router-dom";
+import { Box, Container, Button, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 //to retrieve and display the invoices onto the homepage
 //properties currentUser and setCurrentRecordListener are passed from App.js
@@ -41,11 +42,26 @@ export default function InvoiceRetrieve(props) {
 
   return (
     <Container sx={{ maxWidth: { xl: 1280 } }}>
-      <nav>
-        <Link to={`/invoices/createinvoice`}>
-          <button>+ New Invoice</button>
-        </Link>
-      </nav>
+      <Box
+        mt={3}
+        pb={1}
+        width="100%"
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          component={Link}
+          to={`/invoices/createinvoice`}
+        >
+          New Invoice
+        </Button>
+      </Box>
+
       <Box display="flex" flexWrap="wrap" width="100%" gap={1}>
         {Object.keys(filteredInvoiceList).length > 0 ? (
           Object.keys(filteredInvoiceList).map((entry) => (
@@ -63,7 +79,26 @@ export default function InvoiceRetrieve(props) {
             />
           ))
         ) : (
-          <p>No records 🎉. Split-A-Bill to begin.</p>
+          <Container component="main" sx={{ mt: 8, mb: 2 }} maxWidth="sm">
+            <Typography
+              sx={{ fontWeight: "bold", color: "#132F4C" }}
+              variant="h2"
+              component="h1"
+              gutterBottom
+            >
+              Welcome {props.currentUser.displayName}.
+            </Typography>
+            <Typography
+              sx={{ fontWeight: "medium", color: "#007FFF" }}
+              variant="h5"
+              component="h2"
+              gutterBottom
+            >
+              {"There's nothing here."}
+              <br />
+              {"Click on + New Invoice to get started."}
+            </Typography>
+          </Container>
         )}
       </Box>
     </Container>

@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
 // @mui
 import { alpha } from "@mui/material/styles";
 import {
@@ -11,46 +14,21 @@ import {
   IconButton,
   Popover,
 } from "@mui/material";
-import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
-
-// ----------------------------------------------------------------------
-const account = {
-  displayName: "Hazelle Lim",
-  email: "hazelle@email.com",
-  photoURL: "/assets/images/avatars/avatar_default.jpg",
-};
-
-const MENU_OPTIONS = [
-  {
-    label: "Edit Profile",
-  },
-  {
-    label: "Logout",
-  },
-];
-
-// ----------------------------------------------------------------------
-
 
 export default function AccountPopover(props) {
   
   const [open, setOpen] = useState(null);
 
+  const navigate = useNavigate();
+
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setOpen(null);
-  };
-
-  const navigate = useNavigate()
   const handleLogout = () => {
+    setOpen(null);
     signOut(auth)
       .then(() => {
-        // unsubAuthStateChanged()
         navigate("/Login");
       })
       .catch((error) => {
@@ -58,9 +36,21 @@ export default function AccountPopover(props) {
       });
   };
 
-  const openProfilePage = () => {
-    navigate("/userprofile")
-  }
+  const handleClose = () => {
+    setOpen(null);
+    navigate("/userprofile");
+  };
+
+  const MENU_OPTIONS = [
+    {
+      label: "Profile Page",
+      action: handleClose,
+    },
+    {
+      label: "Logout",
+      action: handleLogout,
+    },
+  ];
 
   return (
     <>
@@ -81,13 +71,13 @@ export default function AccountPopover(props) {
           }),
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar src={props.pfp} alt="photoURL" />
       </IconButton>
 
       <Popover
         open={Boolean(open)}
         anchorEl={open}
-        onClose={handleClose}
+        onClose={() => setOpen(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         PaperProps={{
@@ -115,18 +105,11 @@ export default function AccountPopover(props) {
         <Divider sx={{ borderStyle: "dashed" }} />
 
         <Stack sx={{ p: 1 }}>
-          {/* {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={()=>{handleClose();dummyhandle()}}>
-              {console.log(option)}
+          {MENU_OPTIONS.map((option) => (
+            <MenuItem key={option.label} onClick={option.action}>
               {option.label}
             </MenuItem>
-          ))} */}
-          <MenuItem key={"Profile-page"} onClick={()=>{handleClose();openProfilePage()}}>
-              Profile Page
-          </MenuItem>
-          <MenuItem key={"Logout"} onClick={()=>{handleClose();handleLogout()}}>
-              Logout
-          </MenuItem>
+          ))}
         </Stack>
       </Popover>
     </>

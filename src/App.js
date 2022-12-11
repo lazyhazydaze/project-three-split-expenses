@@ -10,8 +10,6 @@ import Header from "./components/Header";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
-import Homepage from "./components/Homepage";
-
 import { Login } from "./components/Login";
 import { Register } from "./components/Register";
 import { Friendpage } from "./components/Friendpage";
@@ -26,21 +24,15 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        let dontbeconfusedhazelle = auth.currentUser;
-        setCurrentUser(dontbeconfusedhazelle);
-        // console.log("logged in")
-        // console.log("dashboard",user)
+        setCurrentUser(auth.currentUser);
       } else {
-        // console.log("not logged in")
+        setCurrentUser(null);
         navigate("/Login");
       }
-      return () => {
-        unsubscribe();
-      };
     });
-  }, []); //run once on render
+  }, [currentUser]); //run once on render
 
   // const [currentUser, setCurrentUser] = useState({
   //   username: user? user.displayName : "thing",
@@ -118,7 +110,15 @@ export default function App() {
         <Route path="Register" element={<Register />} />
 
         <Route path="/" element={<Header currentUser={currentUser} />}>
-          <Route path="/" element={<Homepage username={currentUser} />} />
+          <Route
+            path="/"
+            element={
+              <InvoiceRetrieve
+                currentUser={currentUser}
+                setCurrentRecordListener={setCurrentRecordListener}
+              />
+            }
+          />
           <Route path="contacts" element={<Friendpage />} />
           <Route
             path="invoices"
@@ -140,12 +140,10 @@ export default function App() {
               />
             }
           />
-
           <Route
             path="invoices/createinvoice"
             element={<InvoiceForm currentUser={currentUser} />}
           />
-
           <Route path="userprofile" element={<UserProfile />} />
 
           <Route
@@ -158,9 +156,6 @@ export default function App() {
           />
         </Route>
       </Routes>
-
-      {/* {console.log("line 194", currentRecord)}
-      {console.log("line 195", currentRecord.expenses)} */}
     </div>
   );
 }
