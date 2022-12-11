@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Box, Container } from "@mui/material";
 import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "../firebase";
 import InvoiceCard from "./InvoiceCard";
 import { Link } from "react-router-dom";
+import { Box, Container, Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 //to retrieve and display the invoices onto the homepage
 //properties currentUser and setCurrentRecordListener are passed from App.js
@@ -41,11 +42,26 @@ export default function InvoiceRetrieve(props) {
 
   return (
     <Container sx={{ maxWidth: { xl: 1280 } }}>
-      <nav>
-        <Link to={`/invoices/createinvoice`}>
-          <button>+ New Invoice</button>
-        </Link>
-      </nav>
+      <Box
+        mt={3}
+        pb={1}
+        width="100%"
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          component={Link}
+          to={`/invoices/createinvoice`}
+        >
+          New Invoice
+        </Button>
+      </Box>
+
       <Box display="flex" flexWrap="wrap" width="100%" gap={1}>
         {Object.keys(filteredInvoiceList).length > 0 ? (
           Object.keys(filteredInvoiceList).map((entry) => (
