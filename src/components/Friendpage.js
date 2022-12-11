@@ -49,7 +49,7 @@ export const Friendpage = () => {
                 let currentFriendsList = [...userObject.currentFriends];
                 currentFriendsList.every((currentFriend) => {
                   if (user.email === currentFriend.value) {
-                    alert("alr added as friend");
+                    alert("Already added as friend");
                     doesExist = true;
                     return false;
                   }
@@ -59,7 +59,7 @@ export const Friendpage = () => {
                 let oldFriendRequestFrom = [...userObject.friendRequestFrom];
                 if (oldFriendRequestFrom.includes(user.uid)) {
                   //friend alr exist
-                  alert("friend req alr sent");
+                  alert("Friend Request already sent before.");
                   doesExist = true;
                 } else {
                   const updates = {};
@@ -68,19 +68,19 @@ export const Friendpage = () => {
                     user.uid,
                   ];
                   update(ref(database), updates);
-                  alert("friend req sent");
+                  alert("Sent!");
                   doesExist = true;
                 }
               } else if (!doesExist) {
                 const updates = {};
                 updates[`friendRequestFrom`] = [user.uid];
                 update(ref(database, `users/${UID}`), updates);
-                alert("friend req sent");
+                alert("Sent!");
                 doesExist = true;
               }
             }
           }
-          if (!doesExist) alert("user not in database");
+          if (!doesExist) alert("User does not exist in database.");
           console.log("No data avail");
         }
       })
