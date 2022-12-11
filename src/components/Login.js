@@ -43,7 +43,7 @@ export const Login = () => {
                 <form onSubmit={(e)=>handleLogin(e)}>
                     <input className='input-text' type={"text"} placeholder={"Email"} onChange={(e)=>{setEmail(e.target.value)}}/>
                     <br/>
-                    <input className='input-text' type={"text"} placeholder={"Password"} onChange={(e)=>{setPassword(e.target.value)}}/>
+                    <input className='input-text' type={"password"} placeholder={"Password"} onChange={(e)=>{setPassword(e.target.value)}}/>
                     <br/>
                     <input className='submit' type={"submit"}/>
                 </form>
