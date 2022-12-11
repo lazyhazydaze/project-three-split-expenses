@@ -3,7 +3,7 @@ import { ref as databaseRef, onValue } from "firebase/database";
 import { database } from "../firebase";
 import InvoiceCard from "./InvoiceCard";
 import { Link } from "react-router-dom";
-import { Box, Container, Button } from "@mui/material";
+import { Box, Container, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
 //to retrieve and display the invoices onto the homepage
@@ -79,7 +79,26 @@ export default function InvoiceRetrieve(props) {
             />
           ))
         ) : (
-          <p>No records 🎉. Split-A-Bill to begin.</p>
+          <Container component="main" sx={{ mt: 8, mb: 2 }} maxWidth="sm">
+            <Typography
+              sx={{ fontWeight: "bold", color: "#132F4C" }}
+              variant="h2"
+              component="h1"
+              gutterBottom
+            >
+              Welcome {props.currentUser.displayName}.
+            </Typography>
+            <Typography
+              sx={{ fontWeight: "medium", color: "#007FFF" }}
+              variant="h5"
+              component="h2"
+              gutterBottom
+            >
+              {"There's nothing here."}
+              <br />
+              {"Click on + New Invoice to get started."}
+            </Typography>
+          </Container>
         )}
       </Box>
     </Container>
