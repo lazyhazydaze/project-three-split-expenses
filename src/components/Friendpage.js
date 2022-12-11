@@ -96,13 +96,15 @@ export const Friendpage = () => {
   const [friendList, setFriendList] = useState([]);
 
   const getCurrentFriendList = () => {
-    onValue(child(dbRef, `users/${user.uid}/currentFriends`), (snapshot) => {
-      if (snapshot.val()) {
-        setFriendList(snapshot.val());
-      } else {
-        setFriendList([]);
-      }
-    });
+    if (user && "uid" in user) {
+      onValue(child(dbRef, `users/${user.uid}/currentFriends`), (snapshot) => {
+        if (snapshot.val()) {
+          setFriendList(snapshot.val());
+        } else {
+          setFriendList([]);
+        }
+      });
+    }
   };
 
   const getCurrentFriendRequests = () => {
@@ -126,16 +128,14 @@ export const Friendpage = () => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(auth.currentUser);
       } else {
+        setUser("");
         navigate("/Login");
       }
     });
-    return () => {
-      unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
