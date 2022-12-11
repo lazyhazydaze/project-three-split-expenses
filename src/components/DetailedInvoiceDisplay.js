@@ -8,6 +8,8 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -65,6 +67,7 @@ function a11yProps(index) {
 
 export default function DetailedInvoiceDisplay(props) {
   const [open, setOpen] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -123,14 +126,54 @@ export default function DetailedInvoiceDisplay(props) {
       {props.currentRecord &&
         props.currentRecord.expenses &&
         props.currentRecord.author.email === props.currentUser.email && (
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<DeleteForeverIcon />}
-            onClick={clearRecords}
-          >
-            Clear All
-          </Button>
+          <span>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DeleteForeverIcon />}
+              onClick={() => {
+                setClearOpen(true);
+              }}
+            >
+              Clear All
+            </Button>
+            <Dialog
+              open={clearOpen}
+              onClose={() => {
+                setClearOpen(false);
+              }}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">
+                {"Confirm delete?"}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  This action cannot be undone. Deleted records cannot be
+                  recovered. Are you sure you want to proceed?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    setClearOpen(false);
+                  }}
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => {
+                    setClearOpen(false);
+                    clearRecords();
+                  }}
+                  autoFocus
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </span>
         )}
     </center>
   );
