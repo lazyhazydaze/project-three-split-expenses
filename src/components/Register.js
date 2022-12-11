@@ -20,6 +20,8 @@ export const Register = () => {
 
     const navigate = useNavigate()
     
+    
+
     const handleRegister =(e)=>{
         e.preventDefault();
         
@@ -89,6 +91,7 @@ export const Register = () => {
                         <br/>
                         <input className='submit' type={"submit"}/>
                     </form>
+                    {/* <span style={{color:"red"}}>{error?error:""}</span> */}
                     <br/>
                 <nav>
                     <Link className='back' to={"/Login"}>Back to Login</Link>

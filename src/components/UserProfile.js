@@ -118,6 +118,7 @@ export const UserProfile = () => {
 
   return (
     <>
+    <div className="background-container">
       <div style={{ postion: "fixed" }}>
         {/* Why does this trigger Register.js createUsername() function????????? */}
 
@@ -206,6 +207,8 @@ export const UserProfile = () => {
           </div>
         </div>
       </div>
+    </div>
+     
     </>
   );
 };

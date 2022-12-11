@@ -7,6 +7,7 @@ import "./Login.css"
 export const Login = () => {
   const navigate = useNavigate();
 
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user && user.displayName != null) {
@@ -17,6 +18,7 @@ export const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("")
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -29,6 +31,7 @@ export const Login = () => {
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
+        setError(errorMessage)
         console.log(errorCode);
         console.log(errorMessage);
       });
@@ -47,6 +50,7 @@ export const Login = () => {
                     <br/>
                     <input className='submit' type={"submit"}/>
                 </form>
+                <span style={{color:"red"}}>{error?error:""}</span>
                 <br/>
                 <nav>
                     {/* <Link to={"/App"}>to App</Link> */}

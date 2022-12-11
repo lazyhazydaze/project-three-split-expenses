@@ -1,3 +1,4 @@
+import { height } from "@mui/system";
 import { onAuthStateChanged } from "firebase/auth";
 import { child, get, update, ref, onValue } from "firebase/database";
 import React, { useEffect, useRef, useState } from "react";
@@ -187,9 +188,6 @@ export const Friendpage = () => {
         return newarr;
       })
       .then((newarr) => {
-        // set(ref(database,`users/${user.uid}`),{ // more testing needs to be done on update or set
-        //     friendRequestFrom : newarr
-        // })
         const updates = {};
         updates[`users/${user.uid}/friendRequestFrom`] = [newarr];
         update(ref(database), updates);
@@ -208,7 +206,7 @@ export const Friendpage = () => {
             if (snapshot.val() == null) {
               const updates = {};
               updates[`users/${user.uid}/currentFriends`] = [
-                { value: friendEmail, label: username },
+                { value: friendEmail, label: username }
               ];
               update(ref(database), updates);
             } else {
@@ -216,7 +214,7 @@ export const Friendpage = () => {
               const updates = {};
               updates[`users/${user.uid}/currentFriends`] = [
                 ...snapshot.val(),
-                { value: friendEmail, label: username },
+                { value: friendEmail, label: username }
               ];
               update(ref(database), updates);
             }
@@ -230,14 +228,14 @@ export const Friendpage = () => {
             if (snapshot.val() == null) {
               const updates = {};
               updates[`users/${thisfriendid}/currentFriends`] = [
-                { value: user.email, label: user.displayName },
+                { value: user.email, label: user.displayName }
               ];
               update(ref(database), updates);
             } else {
               const updates = {};
               updates[`users/${thisfriendid}/currentFriends`] = [
                 ...snapshot.val(),
-                { value: user.email, label: user.displayName },
+                { value: user.email, label: user.displayName }
               ];
               update(ref(database), updates);
             }
@@ -262,9 +260,6 @@ export const Friendpage = () => {
         return newarr;
       })
       .then((newarr) => {
-        // set(ref(database,`users/${user.uid}`),{ // more testing needs to be done on update or set
-        //     friendRequestFrom : newarr
-        // })
         const updates = {};
         updates[`users/${user.uid}/friendRequestFrom`] = [newarr];
         update(ref(database), updates);
@@ -275,88 +270,134 @@ export const Friendpage = () => {
 
   return (
     <>
-      <div>
-        <h2>Friend List</h2>
-        {friendList.length > 0 && (
-          <ol>
-            {friendList.map((friend) => {
-              return (
-                <li>
-                  {friend.label} {friend.value}
-                </li>
-              );
-            })}
-          </ol>
-        )}
-        <button onClick={openAddFriendMenu}>Add Friend</button>
-      </div>
-
-      <div ref={addfriendwindow} className={"addfriend"}>
-        Add friend menu
-        <span className="close" onClick={closeAddFriendMenu}>
-          &times;
-        </span>
-        <form onSubmit={(e) => sendFriendRequest(e)}>
-          <input
-            type={"text"}
-            onChange={(e) => {
-              setFriendID(e.target.value);
-            }}
-            placeholder={"enter email to add"}
-            value={friendID}
-          />
-          <input type={"submit"} />
-        </form>
-      </div>
-
-      <div>
-        <h2>Current Friends</h2>
-
-        <span
-          onClick={openAcceptRequestWindow}
-          className="requests"
-        >{`${numberOfRequests} new requests`}</span>
-      </div>
-
-      <div ref={acceptfriendwindow} className={"acceptfriend"}>
-        <div className="acceptfriend-content">
-          Friend Requests
-          <span className="close" onClick={closeAcceptRequestWindow}>
+    <div style={{backgroundColor:"rgb(126, 177, 255)", height:"93.5vh"}}>
+    <div className="general-container">
+      <div className="friendlist-container">
+        <div className="friendlist-holder">
+          <span style={{textDecoration:""}}>Friend List</span>
+          <i className="addsign fa fa-user-plus" onClick={openAddFriendMenu}></i>
+        </div>
+        
+        <div ref={addfriendwindow} className={"addfriend"}>
+          What's your friend's email?
+          <span className="close" onClick={closeAddFriendMenu}>
             &times;
           </span>
-          {/* map the friend requests use jsx */}
-          {/* {console.log("List",requestListUsernames)}
-                    {console.log("reqlist",requestList)} */}
-          {requestList.length > 0 ? (
-            requestListUsernames.map((username, index) => {
-              return (
-                <div key={index} style={{ position: "relative" }}>
-                  {/* {console.log("key",)} */}
-                  <div className="crosstick-herder">
-                    <span>{`${username}`}</span>
-                    <div>
-                      <span
-                        className="tick"
-                        onClick={() => acceptFriendRequest(username, index)}
-                      >
-                        &#x2713;
-                      </span>
-                      <span
-                        className="cross"
-                        onClick={() => rejectFriendRequest(username, index)}
-                      >
-                        &#x2717;
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ); // fix this css slowly tmr i want sleep early
-            })
-          ) : (
-            <p>no friend requests</p>
+          <form onSubmit={(e) => sendFriendRequest(e)}>
+            <input
+              type={"text"}
+              onChange={(e) => {
+                setFriendID(e.target.value);
+              }}
+              placeholder={"enter email to add"}
+              value={friendID}
+            />
+            <input type={"submit"} />
+          </form>
+        </div>
+
+        <div className="scroll">
+          {friendList.length > 0 && (
+            <ol>
+              {friendList.map((friend) => {
+                return (
+                  <li className="friend">
+                    {friend.label} ({friend.value})
+                  </li>
+                );
+              })}
+            </ol>
           )}
         </div>
+        
+        
       </div>
+
+   
+      <div className="requestlist-container">
+        {/* <div>
+          <span
+            onClick={openAcceptRequestWindow}
+            className="requests"
+          >{`${numberOfRequests} new requests`}</span>
+        </div> */}
+        <h3>Friend Requests</h3>
+
+        <div className="scroll">
+          {requestList.length > 0 ? (
+                requestListUsernames.map((username, index) => {
+                  return (
+                    <div key={index} style={{ position: "relative" }}>
+                      {/* {console.log("key",)} */}
+                      <div className="crosstick-herder">
+                        <span>{`${username}`}</span>
+                        <div>
+                          <span
+                            className="tick"
+                            onClick={() => acceptFriendRequest(username, index)}
+                          >
+                            &#x2713;
+                          </span>
+                          <span
+                            className="cross"
+                            onClick={() => rejectFriendRequest(username, index)}
+                          >
+                            &#x2717;
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ); // fix this css slowly tmr i want sleep early
+                })
+              ) : (
+                <p>no friend requests</p>
+              )}
+        </div>
+        
+
+        <div ref={acceptfriendwindow} className={"acceptfriend"}>
+          <div className="acceptfriend-content">
+            Friend Requests
+            <span className="close" onClick={closeAcceptRequestWindow}>
+              &times;
+            </span>
+            {/* map the friend requests use jsx */}
+            {/* {console.log("List",requestListUsernames)}
+                      {console.log("reqlist",requestList)} */}
+            {requestList.length > 0 ? (
+              requestListUsernames.map((username, index) => {
+                return (
+                  <div key={index} style={{ position: "relative" }}>
+                    {/* {console.log("key",)} */}
+                    <div className="crosstick-herder">
+                      <span>{`${username}`}</span>
+                      <div>
+                        <span
+                          className="tick"
+                          onClick={() => acceptFriendRequest(username, index)}
+                        >
+                          &#x2713;
+                        </span>
+                        <span
+                          className="cross"
+                          onClick={() => rejectFriendRequest(username, index)}
+                        >
+                          &#x2717;
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ); // fix this css slowly tmr i want sleep early
+              })
+            ) : (
+              <p>no friend requests</p>
+            )}
+          </div>
+        </div>
+      </div>
+      
+    </div> 
+    </div> 
     </>
   );
 };

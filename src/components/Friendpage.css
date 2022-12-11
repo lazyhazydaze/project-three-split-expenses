@@ -7,16 +7,11 @@
     color: red;
   }
 
-.tick {
-
-}
 .tick:hover{
   color: lawngreen;
   cursor: pointer;
 }
 
-.cross {
-}
 .cross:hover{
   color: red;
   cursor: pointer;
@@ -40,12 +35,12 @@
 
 .acceptfriend {
   display: none;
-  position: absolute;
-  top: 0%;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.50);
+  /* position: absolute; */
+  /* top: 0%; */
+  /* z-index: 1; */
+  /* width: 100%;
+  height: 100%; */
+  /* background-color: rgba(0, 0, 0, 0.50); */
 }
 
 .acceptfriend.display {
@@ -53,12 +48,98 @@
 }
 
 .acceptfriend-content{
-  background-color: white;
+  /* background-color: white; */
     position: relative;
-    top: 20%;
+    /* top: 20%;
     left: 30%;
-    width: 40%;
+    width: 40%; */
     padding: 20px;
     border-radius: 5px;
-    border: 2px solid black;
+    /* border: 2px solid black; */
+}
+
+
+
+.general-container{
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  left: 15%;
+  top: 25px;
+  width: 80%;
+  /* background-color: rgb(58, 60, 60); */
+}
+
+.friendlist-container{
+  position: relative;
+  border: 2px solid black;
+  padding: 25px;
+  width: 48vw;
+  height: 80vh;
+  border-radius: 25px;
+  background-color: white;
+
+  /* left: 12%; */
+}
+
+.friendlist-holder{
+  font-size: 28px;
+  display: flex;
+  /* justify-content: center; */
+  margin-bottom: 25px;
+}
+
+.addsign{
+  position: relative;
+  /* right: 100%; */
+  bottom: 1px;
+  cursor: pointer;
+  float: right;
+  margin-left: 10px;
+}
+
+.requestlist-container{
+  position: relative;
+  border: 2px solid black;
+  border-radius: 25px;
+  margin-left: 25px;
+  padding: 25px;
+  width: 15vw;
+  background-color: white;
+
+  /* left: 55% */
+
+}
+
+.addfriend {
+  display: none;
+  background-color: white;
+  position: relative;
+  /* top: 20%; */
+  /* left: 30%; */
+  /* width: 40%; */
+  padding: 20px;
+  border-radius: 5px;
+  border: 2px solid black;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+
+.addfriend.display{
+  display: block;
+}
+
+div.scroll {
+  /* margin:4px, 4px; */
+  padding:4px;
+  /* background-color: green; */
+  width: 100%;
+  height: 60%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* text-align:justify; */
+}
+
+li.friend{
+  margin-block: 10px;
 }
