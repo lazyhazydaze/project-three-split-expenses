@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ListItem,
   ListItemText,
@@ -20,9 +20,39 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import axios from "axios";
 
 export default function ReceiptDisplay(props) {
+  const [userExpensesData, setUserExpensesData] = useState([]);
   const [open, setOpen] = useState(false);
+
+  // helper function to create an array of splitted amounts spent
+  const helperTotalSpent = (arrayofobjects) => {
+    let newarray = [];
+    arrayofobjects.forEach((object) => {
+      newarray.push(object.amount);
+    });
+    console.log("a newarray:", newarray);
+    const initialValue = 0;
+    const sum = newarray.reduce(
+      (accumulator, currentValue) => Number(accumulator) + Number(currentValue),
+      initialValue
+    );
+    return sum.toFixed(2);
+  };
+
+  // axios get from backend each user's expenses in particular invoice
+  const getUserExpenses = async () => {
+    let response = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/expenses/invoice/${props.invoiceid}/spender/${props.spenderid}`
+    );
+    console.log("user's expenses per invoice : ", response.data);
+    setUserExpensesData(response.data);
+  };
+
+  useEffect(() => {
+    getUserExpenses();
+  }, [props.invoiceid, props.spenderid]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -34,13 +64,13 @@ export default function ReceiptDisplay(props) {
 
   return (
     <div>
-      {props.receipt.purchases.length > 0 && (
+      {userExpensesData && userExpensesData.length > 0 && (
         <div>
           <ListItem onClick={handleClickOpen}>
             <ListItemButton>
               <ListItemText
-                primary={props.name.label}
-                secondary={props.name.value}
+                primary={userExpensesData[0].splitby.name}
+                secondary={userExpensesData[0].splitby.email}
               />
               <ListItemSecondaryAction>
                 <Typography
@@ -48,18 +78,20 @@ export default function ReceiptDisplay(props) {
                   color="textSecondary"
                   component="span"
                 >
-                  ${props.receipt.total.toFixed(2)}
+                  ${helperTotalSpent(userExpensesData)}
                 </Typography>
               </ListItemSecondaryAction>
             </ListItemButton>
           </ListItem>
           <Dialog open={open} onClose={handleClose}>
             <center>
-              <DialogTitle>Expenses for {props.name.label}</DialogTitle>
+              <DialogTitle>
+                Expenses for {userExpensesData[0].splitby.name}
+              </DialogTitle>
             </center>
             <DialogContent>
               <DialogContentText>
-                <AcccessibleTable receipt={props.receipt} />
+                <AcccessibleTable userExpensesData={userExpensesData} />
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -77,8 +109,8 @@ function createData(item, cost) {
 }
 
 function AcccessibleTable(props) {
-  const rows = props.receipt.purchases.map((item, i) =>
-    createData(item, props.receipt.costprice[i])
+  const rows = props.userExpensesData.map((item) =>
+    createData(item.expense.name, Number(item.amount))
   );
 
   console.log("rows", rows);
@@ -93,8 +125,8 @@ function AcccessibleTable(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.item}>
+          {rows.map((row, index) => (
+            <TableRow key={index}>
               <TableCell component="th" scope="row">
                 {row.item}
               </TableCell>
@@ -106,34 +138,3 @@ function AcccessibleTable(props) {
     </TableContainer>
   );
 }
-
-// receipt props is an object:
-//{username: 'Bella Tan', purchases: ['AAA','BBB'], costprice: [10,20], total: 4.5}
-
-// <div>
-//   {props.receipt.purchases.length > 0 && (
-//     <div className="tooltip">
-//       <div className="flex-arrow">
-//         <div>
-//           {props.name.label}({props.name.value})
-//         </div>
-//         <div>${props.receipt.total.toFixed(2)}</div>
-//       </div>
-
-//       <span className="tooltiptext">
-//         <table>
-//           <tr>
-//             <th>Purchase</th>
-//             <th>Cost</th>
-//           </tr>
-// {props.receipt.purchases.map((purchase, i) => (
-//   <tr>
-//     <td>{purchase}</td>
-//     <td>${props.receipt.costprice[i].toFixed(2)}</td>
-//   </tr>
-// ))}
-//         </table>
-//       </span>
-//     </div>
-//   )}
-// </div>

@@ -1,17 +1,24 @@
-import React, { useState } from "react";
-import { ref as databaseRef, push, set } from "firebase/database";
-import { database } from "../firebase";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import FormControl from "@mui/material/FormControl";
 import InputAdornment from "@mui/material/InputAdornment";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import IconButton from "@mui/material/IconButton";
-import { TextField } from "@mui/material";
+import {
+  InputLabel,
+  MenuItem,
+  TextField,
+  Select as MuiSelect,
+} from "@mui/material";
+import axios from "axios";
 
 export default function ExpenseForm(props) {
   const [item, setItem] = useState("");
   const [amount, setAmount] = useState("");
+  const [payerOptions, setPayerOptions] = useState([]);
+  const [spenderOptions, setSpenderOptions] = useState([]);
+  const [payer, setPayer] = useState("");
   const [splitBy, setSplitBy] = useState([]);
   const [itemError, setItemError] = useState(true);
   const [itemErrorMessage, setItemErrorMessage] = useState(
@@ -21,6 +28,44 @@ export default function ExpenseForm(props) {
   const [amountErrorMessage, setAmountErrorMessage] = useState(
     "Field cannot be blank."
   );
+
+  const helperPayer = (arrayofobjects) => {
+    let filteredarray = [];
+    arrayofobjects.forEach((object) => {
+      filteredarray.push({
+        userId: object.id,
+        email: object.email,
+        name: object.name,
+      });
+    });
+    return filteredarray;
+  };
+
+  const helperSpender = (arrayofobjects) => {
+    let filteredarray = [];
+    arrayofobjects.forEach((object) => {
+      filteredarray.push({
+        value: object.id,
+        label: object.name,
+      });
+    });
+    return filteredarray;
+  };
+
+  // get the list of users of the group from groupId params to populate splitby field
+  const getGroupMembers = async () => {
+    let group = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/groups/${props.groupId}`
+    );
+    console.log("payer options: ", helperPayer(group.data.users));
+    console.log("spender options: ", helperSpender(group.data.users));
+    setPayerOptions(helperPayer(group.data.users));
+    setSpenderOptions(helperSpender(group.data.users));
+  };
+
+  useEffect(() => {
+    getGroupMembers();
+  }, [props.groupId]);
 
   const validateItemName = (itemValue) => {
     if (itemValue === "") {
@@ -48,26 +93,37 @@ export default function ExpenseForm(props) {
     setAmount(amountValue);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!(itemError || amountError || splitBy.length === 0)) {
-      const record = {
-        item: item,
-        amount: amount,
-        splitBy: splitBy,
-      };
-      const dbRef = push(
-        databaseRef(database, "invoice/" + props.keyval + "/expenses")
-      );
-      set(dbRef, record);
-      setItem("");
-      setAmount("");
-      setSplitBy([]);
-    }
+  const createNewExpense = async (name, price, payerid, spenders) => {
+    const spenderIdsArray = spenders.map(({ value }) => value);
+    console.log("spenderrrrrrs: ", spenders);
+    console.log("spenderIdsArrayyyyyy: ", spenderIdsArray);
+    let newExpense = {
+      name: name,
+      amount: price,
+      payerId: payerid,
+      splitByIds: spenderIdsArray,
+    };
+    await axios
+      .post(
+        `${process.env.REACT_APP_API_SERVER}/expenses/invoice/${props.invoiceId}`,
+        newExpense
+      )
+      .then((response) => {
+        console.log("create expense response", response.data);
+        setItem("");
+        setAmount("");
+        setPayer("");
+        setSplitBy([]);
+      });
   };
 
-  let copyOfNameList = [...props.fullNameList];
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!(itemError || amountError || splitBy.length === 0 || payer === "")) {
+      createNewExpense(item, amount, payer, splitBy);
+      props.reloadAllExpenses();
+    }
+  };
 
   return (
     <div>
@@ -108,10 +164,33 @@ export default function ExpenseForm(props) {
         </FormControl>
       </center>
       <center>
+        <FormControl fullWidth>
+          <InputLabel>Who paid?</InputLabel>
+          <MuiSelect
+            value={payer}
+            label="Payer"
+            onChange={(e) => {
+              setPayer(e.target.value);
+            }}
+          >
+            {payerOptions.map((person) => (
+              <MenuItem
+                key={person.userId}
+                value={person.userId} //or should this be payer.email?
+              >
+                {person.name}
+              </MenuItem>
+            ))}
+          </MuiSelect>
+        </FormControl>
+      </center>
+      <br />
+      <br />
+      <center>
         <FormControl required sx={{ width: "80ch" }} variant="standard">
           <Select
             closeMenuOnSelect={false}
-            options={copyOfNameList}
+            options={spenderOptions}
             value={splitBy}
             onChange={setSplitBy}
             isSearchable={true}

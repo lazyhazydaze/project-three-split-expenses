@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { child, get, ref as databaseRef, remove } from "firebase/database";
-import { database, dbRef } from "../firebase";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -29,7 +27,8 @@ import { Avatar } from "@mui/material";
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 /****************************************************************/
 function TabPanel(props) {
@@ -67,17 +66,50 @@ function a11yProps(index) {
 /****************************************************************/
 
 export default function DetailedInvoiceDisplay(props) {
+  let { groupId, invoiceId } = useParams();
+  const [invoiceData, setInvoiceData] = useState("");
+  const [groupMembersData, setGroupMembersData] = useState([]);
+  const [expensesData, setExpensesData] = useState([]);
+
+  // axios get invoice name, author, date, groupname details from backend
+  const getInvoiceData = async () => {
+    let invoicedata = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/invoices/invoice/${invoiceId}`
+    );
+    console.log("invoice details: ", invoicedata.data);
+    setInvoiceData(invoicedata.data);
+  };
+
+  // axios get group members data from backend
+  const getMembers = async () => {
+    let groupmembers = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/users/${groupId}`
+    );
+    console.log("group members details: ", groupmembers.data.users);
+    setGroupMembersData(groupmembers.data.users);
+  };
+
+  // axios get expenses for specific invoice from backend
+  const getExpenses = async () => {
+    let expenseList = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/expenses/invoice/${invoiceId}`
+    );
+    console.log("expenses list: ", expenseList.data);
+    setExpensesData(expenseList.data);
+  };
+
+  useEffect(() => {
+    getExpenses();
+    getInvoiceData();
+  }, [invoiceId]);
+
+  useEffect(() => {
+    getMembers();
+  }, [groupId]);
+
   const [open, setOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [value, setValue] = useState(0);
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!props.currentRecord.group) {
-      navigate("/invoices");
-    }
-  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -92,135 +124,115 @@ export default function DetailedInvoiceDisplay(props) {
   };
 
   const clearRecords = () => {
-    const db = databaseRef(
-      database,
-      "invoice/" + props.currentKey + "/expenses"
-    );
-    remove(db);
+    console.log("add in router for clear records ");
   };
 
   const addButton = (
     <center>
-      {props.currentRecord.author &&
-        props.currentRecord.author.email === props.currentUser.email && (
-          <span>
-            <Button
-              variant="contained"
-              size="medium"
-              startIcon={<AddIcon />}
-              onClick={handleClickOpen}
-            >
-              Add Expense
-            </Button>
-            <Dialog maxWidth="md" fullWidth open={open} onClose={handleClose}>
-              <DialogContent>
-                <ExpenseForm
-                  keyval={props.currentKey}
-                  fullNameList={
-                    props.currentRecord.group ? props.currentRecord.group : []
-                  }
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose}>Close</Button>
-              </DialogActions>
-            </Dialog>
-          </span>
-        )}
+      <span>
+        <Button
+          variant="contained"
+          size="medium"
+          startIcon={<AddIcon />}
+          onClick={handleClickOpen}
+        >
+          Add Expense
+        </Button>
+        <Dialog maxWidth="md" fullWidth open={open} onClose={handleClose}>
+          <DialogContent>
+            <ExpenseForm
+              groupId={groupId}
+              invoiceId={invoiceId}
+              reloadAllExpenses={getExpenses}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      </span>
     </center>
   );
 
   const clearAllButton = (
     <center>
-      {props.currentRecord &&
-        props.currentRecord.expenses &&
-        props.currentRecord.author.email === props.currentUser.email && (
-          <span>
+      <span>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DeleteForeverIcon />}
+          onClick={() => {
+            setClearOpen(true);
+          }}
+        >
+          Clear All
+        </Button>
+        <Dialog
+          open={clearOpen}
+          onClose={() => {
+            setClearOpen(false);
+          }}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Confirm delete?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              This action cannot be undone. Deleted records cannot be recovered.
+              Are you sure you want to proceed?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<DeleteForeverIcon />}
               onClick={() => {
-                setClearOpen(true);
-              }}
-            >
-              Clear All
-            </Button>
-            <Dialog
-              open={clearOpen}
-              onClose={() => {
                 setClearOpen(false);
               }}
-              aria-labelledby="alert-dialog-title"
-              aria-describedby="alert-dialog-description"
             >
-              <DialogTitle id="alert-dialog-title">
-                {"Confirm delete?"}
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  This action cannot be undone. Deleted records cannot be
-                  recovered. Are you sure you want to proceed?
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={() => {
-                    setClearOpen(false);
-                  }}
-                >
-                  No
-                </Button>
-                <Button
-                  onClick={() => {
-                    setClearOpen(false);
-                    clearRecords();
-                  }}
-                  autoFocus
-                >
-                  Yes
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </span>
-        )}
+              No
+            </Button>
+            <Button
+              onClick={() => {
+                setClearOpen(false);
+                clearRecords();
+              }}
+              autoFocus
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </span>
     </center>
   );
 
   const displayAllExpenses = (
     <Box>
       <List>
-        {props.currentRecord.expenses &&
-          Object.keys(props.currentRecord.expenses).map((entry) => (
-            <ExpenseCard
-              {...props.currentRecord.expenses[entry]}
-              invoicekey={props.currentKey}
-              expensekey={entry}
-              deleterights={
-                props.currentRecord.author.email === props.currentUser.email
-              }
-            />
-          ))}
+        {expensesData.map((expense) => (
+          <ExpenseCard
+            expenseid={expense.id}
+            itemName={expense.name}
+            itemPrice={expense.amount}
+            paidby={expense.payer.name}
+          />
+        ))}
       </List>
     </Box>
   );
 
   const displaySplitBill = (
     <div>
-      {props.currentRecord.expenses ? (
+      {expensesData ? (
         <div>
-          {props.currentRecord.group && (
+          {groupMembersData && (
             <Box>
               <List>
-                {props.currentRecord.group.map(
-                  (contact) =>
-                    props.overallReceipt[contact.value] && (
-                      <ReceiptDisplay
-                        name={contact}
-                        receipt={props.overallReceipt[contact.value]}
-                      />
-                    )
-                )}
+                {groupMembersData.map((contact) => (
+                  <ReceiptDisplay
+                    invoiceid={invoiceId}
+                    spenderid={contact.id}
+                  />
+                ))}
               </List>
             </Box>
           )}
@@ -239,18 +251,17 @@ export default function DetailedInvoiceDisplay(props) {
         <Box mt={2}>
           <Card>
             <CardContent>
-              <Box display="flex" mb={1}>
-                <Box ml={2} flex="1">
-                  <Typography variant="h5">
-                    {props.currentRecord.invoice}
-                  </Typography>
-                  <Typography variant="body2">
-                    {props.currentRecord.date}, by{"  "}
-                    {props.currentRecord.author &&
-                      props.currentRecord.author.username}
-                  </Typography>
+              {invoiceData && (
+                <Box display="flex" mb={1}>
+                  <Box ml={2} flex="1">
+                    <Typography variant="h5">{invoiceData.name}</Typography>
+                    <Typography variant="body2">
+                      {invoiceData.date.slice(0, 10)}, by{"  "}
+                      {invoiceData.author.name}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
+              )}
 
               <Box sx={{ width: "100%" }}>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -262,11 +273,9 @@ export default function DetailedInvoiceDisplay(props) {
                     <Tab label="Expenses" {...a11yProps(0)} />
                     <Tab
                       label={
-                        props.currentRecord.group &&
-                        props.currentRecord.group.length &&
-                        (props.currentRecord.group.length === 1
+                        groupMembersData.length === 1
                           ? "1 Member"
-                          : `${props.currentRecord.group.length} Members`)
+                          : `${groupMembersData.length} Members`
                       }
                       {...a11yProps(1)}
                     />
@@ -283,7 +292,7 @@ export default function DetailedInvoiceDisplay(props) {
                 </TabPanel>
 
                 <TabPanel value={value} index={1}>
-                  <ContactsIterator currentRecord={props.currentRecord} />
+                  <ContactsIterator members={groupMembersData} />
                 </TabPanel>
 
                 <TabPanel value={value} index={2}>
@@ -299,26 +308,7 @@ export default function DetailedInvoiceDisplay(props) {
 }
 
 const ContactsIterator = (props) => {
-  let currentgroup = [...props.currentRecord.group];
-  let allUsers = {};
-  get(child(dbRef, `users`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      allUsers = snapshot.val();
-      console.log(allUsers);
-    } else {
-      console.log("No data avail");
-    }
-    console.log(currentgroup);
-    currentgroup.forEach((element, index) => {
-      let email = element.value;
-      for (const [key, user] of Object.entries(allUsers)) {
-        if (user.email === email) {
-          currentgroup[index]["profilePic"] = user.profilePicture;
-          break;
-        }
-      }
-    });
-  });
+  let currentgroup = [...props.members];
 
   return (
     <Box>
@@ -327,13 +317,11 @@ const ContactsIterator = (props) => {
           currentgroup.map((contact) => (
             <ListItem>
               <ListItemAvatar>
-                <Avatar src={contact.profilePic}>
-                  {contact.label.charAt(0).toUpperCase()}
-                </Avatar>
+                <Avatar src={""}>{contact.name.charAt(0).toUpperCase()}</Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={`${contact.label}`}
-                secondary={<>{contact.value}</>}
+                primary={`${contact.name}`}
+                secondary={<>{contact.email}</>}
               />
             </ListItem>
           ))}
@@ -341,8 +329,3 @@ const ContactsIterator = (props) => {
     </Box>
   );
 };
-
-// <div>
-//   {props.currentRecord.group &&
-//     props.currentRecord.group.map((contact, i) => <div>{contact.label}</div>)}
-// </div>;

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { ref as databaseRef, remove } from "firebase/database";
-import { database } from "../firebase";
 import { Paper, Typography, Link as MuiLink, Box } from "@mui/material";
 import ContactsIcon from "@mui/icons-material/AccountCircle";
 import { Link } from "react-router-dom";
@@ -15,17 +13,16 @@ export default function InvoiceCard(props) {
   //expensekey properties
   const deleteInvoice = (e) => {
     e.preventDefault();
-    const db = databaseRef(database, "invoice/" + props.idvalue);
-    remove(db);
+    console.log("add a delete route for invoice");
   };
   return (
     <MuiLink
       component={Link}
-      to={`/invoices/${props.idvalue}`}
+      to={`/group/${props.groupid}/invoice/${props.invoiceid}`}
       underline="none"
       onMouseEnter={() => setElevation(3)}
       onMouseLeave={() => setElevation(1)}
-      onClick={props.clickMe}
+      //onClick={props.clickMe}
     >
       <Paper
         sx={{
@@ -40,7 +37,7 @@ export default function InvoiceCard(props) {
       >
         <Box display="flex" flexDirection="column" alignItems="center">
           <Box textAlign="center" marginTop={1}>
-            <Typography variant="subtitle2">{props.invoice}</Typography>
+            <Typography variant="subtitle2">{props.name}</Typography>
             <Typography variant="caption" color="textSecondary">
               {props.date}
             </Typography>
@@ -51,7 +48,7 @@ export default function InvoiceCard(props) {
             <ContactsIcon color="disabled" sx={{ mr: 1 }} />
             <div>
               <Typography variant="subtitle2" sx={{ mb: -1 }}>
-                {props.author.username}
+                {props.author.name}
               </Typography>
               <Typography variant="caption" color="textSecondary">
                 created this

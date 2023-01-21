@@ -1,6 +1,4 @@
-import React from "react";
-import { ref as databaseRef, remove } from "firebase/database";
-import { database } from "../firebase";
+import React, { useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 
@@ -11,6 +9,7 @@ import {
   ListItemSecondaryAction,
   Typography,
 } from "@mui/material";
+import axios from "axios";
 
 const getFormattedPrice = (price) => {
   const priceTwoDecimal = Number(price).toFixed(2);
@@ -18,59 +17,55 @@ const getFormattedPrice = (price) => {
 };
 
 export default function ExpenseCard(props) {
-  const pricePerPax = () => {
-    let output = (props.amount / props.splitBy.length).toFixed(2);
-    return output;
+  const [spenders, setSpenders] = useState([]);
+  const [dividedPrice, setDividedPrice] = useState("");
+
+  const helperSpender = (arrayofobjects) => {
+    let filteredarray = [];
+    arrayofobjects.forEach((spender) => {
+      filteredarray.push(spender.splitby.name);
+    });
+    return filteredarray;
   };
+
+  //axios get spenders from backend for specific expense. props passed from DetailedInvoiceDisplay
+  const getSpenders = async () => {
+    let spendersData = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/expenses/${props.expenseid}`
+    );
+    console.log("spenders list: ", spendersData.data);
+    setSpenders(helperSpender(spendersData.data));
+    setDividedPrice(spendersData.data[0].amount);
+  };
+
+  useEffect(() => {
+    getSpenders();
+  }, [props.expenseid]);
 
   const deleteRecord = () => {
-    const db = databaseRef(
-      database,
-      "invoice/" + props.invoicekey + "/expenses/" + props.expensekey
-    );
-    remove(db);
+    console.log("add in router for delete record");
   };
-
-  let spenderArray = [];
-  props.splitBy.forEach((spender) => spenderArray.push(spender.label));
 
   return (
     <ListItem>
       <ListItemAvatar>
-        {props.deleterights && (
-          <IconButton aria-label="delete" onClick={deleteRecord}>
-            <DeleteIcon />
-          </IconButton>
-        )}
+        <IconButton aria-label="delete" onClick={deleteRecord}>
+          <DeleteIcon />
+        </IconButton>
       </ListItemAvatar>
       <ListItemText
-        primary={props.item.toUpperCase()}
-        secondary={spenderArray.join(", ")}
+        primary={props.itemName.toUpperCase()}
+        secondary={spenders.join(", ")}
       />
       <ListItemSecondaryAction>
         <Typography variant="body2" color="textSecondary" component="span">
-          ${getFormattedPrice(props.amount)} (${pricePerPax()}/px)
+          ${getFormattedPrice(props.itemPrice)} ($
+          {getFormattedPrice(dividedPrice)}
+          /px) -- {props.paidby}
         </Typography>
       </ListItemSecondaryAction>
     </ListItem>
   );
 }
 
-// <div>
-//   <div className="card">
-//     <h3>{props.item.toUpperCase()}</h3>
-//     <p>
-//       <b>${getFormattedPrice(props.amount)}</b> (${pricePerPax()}/px)
-//     </p>
-//     <p>
-//       <p>
-//         <i>{spenderArray.join(", ")}</i>{" "}
-//       </p>
-//     </p>
-//     {props.deleterights && (
-//       <button value={props.expensekey} onClick={deleteRecord}>
-//         ✖
-//       </button>
-//     )}
-//   </div>
-// </div>
+// add in a text for paidby too

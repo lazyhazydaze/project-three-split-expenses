@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ref as databaseRef, push, set, get } from "firebase/database";
-import { database } from "../firebase";
 
 // Placeholder contactlist for selection purposes
 // import { contactList } from "../data";
@@ -20,50 +18,64 @@ import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Card, CardContent, Container, FormControl } from "@mui/material";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
-const steps = ["Add Group", "Add Title & Date"];
+const steps = ["Add Title & Date"];
 
 export default function InvoiceForm(props) {
   //props.currentUser properties passed from currentUser state in App.js
   //author is an object, same as currentUser {displayName: "", email:""}
 
-  //
-  const [contactList, setContactList] = useState([]);
-  const contactListCreate = () => {
-    get(
-      databaseRef(database, `users/${props.currentUser.uid}/currentFriends`)
-    ).then((snapshot) => {
-      if (snapshot.val() == null) return;
-      // if(contactList == snapshot.val())return
-      console.log("contactList", contactList);
-      console.log("snapshot", snapshot.val());
-      // console.log("contactlist",snapshot.val())
-      setContactList(snapshot.val());
-      // console.log("inside create after", contactList)
-      console.log("looping in contactListCreate");
+  let { groupId } = useParams();
+
+  const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of ""
+
+  // maybe i dun need these 3 below but i can put them inside the detailed invoice display?
+  // =====================================================
+  // const [chooseMembers, setChooseMembers] = useState([]);
+  const helper = (arrayofobjects) => {
+    let filteredarray = [];
+    arrayofobjects.forEach((object) => {
+      filteredarray.push({
+        value: object.email,
+        label: object.name,
+      });
     });
+    return filteredarray;
+  };
+
+  const getGroupMembers = async () => {
+    let group = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/groups/${groupId}`
+    );
+    console.log("current active group: ", helper(group.data.users));
+    setCurrentGroupData(group.data);
+    // setChooseMembers(helper(group.data.users));
   };
 
   useEffect(() => {
-    contactListCreate();
-  }, []);
+    getGroupMembers();
+  }, [groupId]);
+  // ======================================================
 
-  //
   const [invoice, setInvoice] = useState("");
-  const [author, setAuthor] = useState({
-    username: props.currentUser.displayName,
-    email: props.currentUser.email,
-  });
+  // const [author, setAuthor] = useState({
+  //   username: props.currentUser.name,
+  //   email: props.currentUser.email,
+  // });
   const [date, setDate] = useState(dayjs());
 
   // the list of selectedFriends will always include the author
-  const [selectedFriends, setSelectedFriends] = useState([
-    {
-      value: props.currentUser.email,
-      label: props.currentUser.displayName,
-      isFixed: true,
-    },
-  ]);
+  // this state is different from the "chooseMembers" state
+  //... actually no need this what members from the group will be in the invoice
+  // const [selectedFriends, setSelectedFriends] = useState([
+  //   {
+  //     value: props.currentUser.email,
+  //     label: props.currentUser.name,
+  //     isFixed: true,
+  //   },
+  // ]);
 
   const [titleError, setTitleError] = useState(true);
   const [titleErrorMessage, setTitleErrorMessage] = useState(
@@ -85,71 +97,81 @@ export default function InvoiceForm(props) {
     setInvoice(titleValue);
   };
 
-  const [combinedContactList, setCombinedContactList] = useState([]);
-  // let combinedContactList = []
-
-  useEffect(() => {
-    // console.log("contactList updated",contactList)
-    console.log("looping in useeffect");
-    console.log(contactList);
-    if (contactList.length == 0) return;
-    // console.log("contactisnotundefined",contactList)
-    setCombinedContactList([
-      {
-        value: props.currentUser.email,
-        label: props.currentUser.displayName,
-        isFixed: true,
-      },
-      ...contactList,
-    ]);
-    // console.log("combined",combinedContactList)
-  }, [contactList]);
-  console.log("combined", combinedContactList);
-
   // add the currentUser to the top of the contact list and set it as a default fixed option.
 
   // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
-  useEffect(() => {
-    setAuthor({
-      username: props.currentUser.displayName,
-      email: props.currentUser.email,
-    });
-    const newGroup = [...selectedFriends];
-    newGroup[0] = {
-      value: props.currentUser.email,
-      label: props.currentUser.displayName,
-      isFixed: true,
+  // useEffect(() => {
+  //   setAuthor({
+  //     username: props.currentUser.name,
+  //     email: props.currentUser.email,
+  //   });
+  //   const newGroup = [...selectedFriends];
+  //   newGroup[0] = {
+  //     value: props.currentUser.email,
+  //     label: props.currentUser.name,
+  //     isFixed: true,
+  //   };
+  //   setSelectedFriends(newGroup);
+  // }, [props.currentUser]);
+
+  const createNewInvoice = async (name, date) => {
+    let newInvoice = {
+      name: name,
+      date: date,
+      authorId: props.currentUser.id,
     };
-    setSelectedFriends(newGroup);
-  }, [props.currentUser]);
+    await axios
+      .post(
+        `${process.env.REACT_APP_API_SERVER}/invoices/group/${groupId}`,
+        newInvoice
+      )
+      .then((response) => {
+        console.log("create invoice response", response.data);
+        setInvoice("");
+        setDate(dayjs());
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      });
+  };
 
   const [activeStep, setActiveStep] = useState(0);
 
-  // On submit, invoice (invoice name, author, date, selectedFriends as group) is pushed into db.
+  // On submit, invoice is created in db.
   const handleNext = (e) => {
     e.preventDefault();
-    if (activeStep === 0) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else if (activeStep === 1 && !titleError && date && date.isValid()) {
-      const dbRef = push(databaseRef(database, "invoice"));
-      set(dbRef, {
-        invoice,
-        author,
-        date: date.format("DD/MM/YYYY"),
-        group: selectedFriends,
-      });
-      setInvoice("");
-      setDate(dayjs());
-      setSelectedFriends([
-        {
-          value: props.currentUser.email,
-          label: props.currentUser.displayName,
-          isFixed: true,
-        },
-      ]);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    console.log("a", activeStep);
+    if (activeStep === 0 && !titleError && date && date.isValid()) {
+      console.log("b", activeStep);
+      createNewInvoice(invoice, date);
+      // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } else if (activeStep === 1) {
+      console.log("c", activeStep);
     }
   };
+
+  //  const handleNext = (e) => {
+  //    e.preventDefault();
+  //    if (activeStep === 0) {
+  //      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  //    } else if (activeStep === 1 && !titleError && date && date.isValid()) {
+  //      const dbRef = push(databaseRef(database, "invoice"));
+  //      set(dbRef, {
+  //        invoice,
+  //        author,
+  //        date: date.format("DD/MM/YYYY"),
+  //        group: selectedFriends,
+  //      });
+  //      setInvoice("");
+  //      setDate(dayjs());
+  //      setSelectedFriends([
+  //        {
+  //          value: props.currentUser.email,
+  //          label: props.currentUser.displayName,
+  //          isFixed: true,
+  //        },
+  //      ]);
+  //      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  //    }
+  //  };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -159,43 +181,43 @@ export default function InvoiceForm(props) {
     setActiveStep(0);
   };
 
-  const step1 = (
-    <FormControl
-      required
-      sx={{ mt: 4, mb: 30, width: "100%" }}
-      variant="standard"
-    >
-      <Select
-        closeMenuOnSelect={false}
-        options={combinedContactList}
-        value={selectedFriends}
-        defaultValue={combinedContactList[0]}
-        onChange={setSelectedFriends}
-        isSearchable={true}
-        isMulti
-        styles={{
-          multiValue: (base, state) => {
-            return state.data.isFixed
-              ? { ...base, backgroundColor: "gray" }
-              : base;
-          },
-          multiValueLabel: (base, state) => {
-            return state.data.isFixed
-              ? {
-                  ...base,
-                  fontWeight: "bold",
-                  color: "white",
-                  paddingRight: 6,
-                }
-              : base;
-          },
-          multiValueRemove: (base, state) => {
-            return state.data.isFixed ? { ...base, display: "none" } : base;
-          },
-        }}
-      />
-    </FormControl>
-  );
+  // const step1 = (
+  //   <FormControl
+  //     required
+  //     sx={{ mt: 4, mb: 30, width: "100%" }}
+  //     variant="standard"
+  //   >
+  //     <Select
+  //       closeMenuOnSelect={false}
+  //       options={chooseMembers}
+  //       value={selectedFriends}
+  //       defaultValue={chooseMembers[0]}
+  //       onChange={setSelectedFriends}
+  //       isSearchable={true}
+  //       isMulti
+  //       styles={{
+  //         multiValue: (base, state) => {
+  //           return state.data.isFixed
+  //             ? { ...base, backgroundColor: "gray" }
+  //             : base;
+  //         },
+  //         multiValueLabel: (base, state) => {
+  //           return state.data.isFixed
+  //             ? {
+  //                 ...base,
+  //                 fontWeight: "bold",
+  //                 color: "white",
+  //                 paddingRight: 6,
+  //               }
+  //             : base;
+  //         },
+  //         multiValueRemove: (base, state) => {
+  //           return state.data.isFixed ? { ...base, display: "none" } : base;
+  //         },
+  //       }}
+  //     />
+  //   </FormControl>
+  // );
 
   const step2 = (
     <Box
@@ -226,7 +248,7 @@ export default function InvoiceForm(props) {
     </Box>
   );
 
-  const stepForm = [step1, step2];
+  const stepForm = [step2];
 
   return (
     <Container sx={{ maxWidth: { xl: 800 } }}>

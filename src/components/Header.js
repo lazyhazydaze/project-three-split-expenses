@@ -18,11 +18,11 @@ export default function Header(props) {
 
   const [photoURL, setPhotoURL] = useState(null);
 
-  let currentPath = "/invoices";
+  let currentPath = "/dashboard";
   if (!!matchPath("/contacts/*", location.pathname)) {
     currentPath = "/contacts";
-  } else if (!!matchPath("/invoices/*", location.pathname)) {
-    currentPath = "/invoices";
+  } else if (!!matchPath("/dashboard/*", location.pathname)) {
+    currentPath = "/dashboard";
   }
 
   useEffect(() => {
@@ -65,11 +65,18 @@ export default function Header(props) {
                   textColor="inherit"
                 >
                   {/* <Tab label={"Homepage"} component={Link} to="/" value="/" /> */}
-                  <Tab
+
+                  {/* <Tab
                     label={"Invoices"}
                     component={Link}
                     to="/invoices"
                     value="/invoices"
+                  /> */}
+                  <Tab
+                    label={"Dashboard"}
+                    component={Link}
+                    to="/dashboard"
+                    value="/dashboard"
                   />
                   <Tab
                     label={"Contacts"}
