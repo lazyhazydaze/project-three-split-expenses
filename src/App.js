@@ -12,15 +12,17 @@ import { Friendpage } from "./components/Friendpage";
 import { UserProfile } from "./components/UserProfile";
 import Dashboard from "./components/Dashboard";
 import GroupForm from "./components/GroupForm";
+import GroupBalance from "./components/GroupBalance";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState({});
   const { isLoading, user, isAuthenticated, loginWithRedirect } = useAuth0();
 
-  const createOrGetUser = async (name, email) => {
+  const createOrGetUser = async (name, email, picture) => {
     let newUser = {
       name: name,
       email: email,
+      picture: picture,
     };
     let response = await axios.post(
       `${process.env.REACT_APP_API_SERVER}/users`,
@@ -36,7 +38,7 @@ export default function App() {
     console.log(isAuthenticated);
     if (!isLoading) {
       if (isAuthenticated) {
-        createOrGetUser(user.nickname, user.email);
+        createOrGetUser(user.nickname, user.email, user.picture);
       } else {
         loginWithRedirect();
       }
@@ -68,7 +70,11 @@ export default function App() {
             path="group/:groupId/createinvoice"
             element={<InvoiceForm currentUser={currentUser} />}
           />
-          <Route path="userprofile" element={<UserProfile />} />
+          <Route path="/group/:groupId/settle" element={<GroupBalance />} />
+          <Route
+            path="userprofile"
+            element={<UserProfile currentUser={currentUser} />}
+          />
           <Route
             path="group/:groupId/invoices"
             element={<InvoiceRetrieve currentUser={currentUser} />}

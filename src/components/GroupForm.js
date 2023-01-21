@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Container, Paper, Typography } from "@mui/material";
 
 export default function GroupForm(props) {
   // Textfield for group name
@@ -97,40 +98,49 @@ export default function GroupForm(props) {
 
   return (
     <div>
-      <h1>Start A New Group</h1>
-      <h4>This group is called...</h4>
-      <input
-        name="groupname"
-        placeholder="Group name..."
-        onChange={({ target }) => setGroupNameField(target.value)}
-        value={groupNameField}
-      />{" "}
-      <br />
-      <br />
-      <h4>Group members</h4>
-      {selectedUsers.map((form, index) => {
-        return (
-          <div key={index}>
-            <input
-              name="name"
-              placeholder="Name"
-              onChange={(event) => handleFormChange(event, index)}
-              value={form.name}
-            />
-            <input
-              name="email"
-              placeholder="Email"
-              onChange={(event) => handleFormChange(event, index)}
-              value={form.email}
-            />
-            <button onClick={() => removeFields(index)}>Remove</button>
-          </div>
-        );
-      })}
-      <button onClick={addFields}>Add More</button>
-      <br />
-      <br />
-      <button onClick={submit}>Save</button>
+      <Container maxWidth="sm" sx={{ mb: 4 }}>
+        <Paper
+          variant="outlined"
+          sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
+        >
+          <Typography component="h1" variant="h4" align="center">
+            + New Group
+          </Typography>
+          <h4>This group is called...</h4>
+          <input
+            name="groupname"
+            placeholder="Group name..."
+            onChange={({ target }) => setGroupNameField(target.value)}
+            value={groupNameField}
+          />{" "}
+          <br />
+          <br />
+          <h4>Group members</h4>
+          {selectedUsers.map((form, index) => {
+            return (
+              <div key={index}>
+                <input
+                  name="name"
+                  placeholder="Name"
+                  onChange={(event) => handleFormChange(event, index)}
+                  value={form.name}
+                />
+                <input
+                  name="email"
+                  placeholder="Email"
+                  onChange={(event) => handleFormChange(event, index)}
+                  value={form.email}
+                />
+                <button onClick={() => removeFields(index)}>Remove</button>
+              </div>
+            );
+          })}
+          <button onClick={addFields}>Add More</button>
+          <br />
+          <br />
+          <button onClick={submit}>Save</button>
+        </Paper>
+      </Container>
     </div>
   );
 }

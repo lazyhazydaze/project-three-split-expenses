@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-//import { auth } from "../firebase";
-//import { signOut } from "firebase/auth";
 // @mui
 import { alpha } from "@mui/material/styles";
 import {
@@ -17,7 +15,7 @@ import {
 } from "@mui/material";
 
 export default function AccountPopover(props) {
-  const { logout, user, isAuthenticated } = useAuth0();
+  const { logout } = useAuth0();
 
   const [open, setOpen] = useState(null);
 
@@ -31,18 +29,6 @@ export default function AccountPopover(props) {
     setOpen(null);
     logout({ returnTo: window.location.origin });
   };
-
-  // === for firebase ===
-  // const handleLogout = () => {
-  //   setOpen(null);
-  //   signOut(auth)
-  //     .then(() => {
-  //       navigate("/Login");
-  //     })
-  //     .catch((error) => {
-  //       console.log("sign out fail", error);
-  //     });
-  // };
 
   const handleClose = () => {
     setOpen(null);
@@ -103,12 +89,10 @@ export default function AccountPopover(props) {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {/* {props.displayName} */}
-            {isAuthenticated && user.nickname}
+            {props.displayName}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary" }} noWrap>
-            {/* {props.email} */}
-            {isAuthenticated && user.email}
+            {props.email}
           </Typography>
         </Box>
 

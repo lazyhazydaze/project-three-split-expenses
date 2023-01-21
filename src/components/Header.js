@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Tabs,
   Tab,
@@ -10,13 +10,10 @@ import {
 } from "@mui/material";
 import { Outlet, Link, matchPath, useLocation } from "react-router-dom";
 import AccountPopover from "./AccountPopover";
-import { child, onValue } from "firebase/database";
-import { dbRef } from "../firebase";
+import Logo from "../lightning.png";
 
 export default function Header(props) {
   const location = useLocation();
-
-  const [photoURL, setPhotoURL] = useState(null);
 
   let currentPath = "/dashboard";
   if (!!matchPath("/contacts/*", location.pathname)) {
@@ -24,19 +21,6 @@ export default function Header(props) {
   } else if (!!matchPath("/dashboard/*", location.pathname)) {
     currentPath = "/dashboard";
   }
-
-  useEffect(() => {
-    onValue(
-      child(dbRef, `users/${props.currentUser.uid}/profilePicture`),
-      (snapshot) => {
-        if (snapshot.val()) {
-          setPhotoURL(snapshot.val());
-        } else {
-          setPhotoURL(null);
-        }
-      }
-    );
-  }, [props.currentUser]);
 
   return (
     <div>
@@ -48,13 +32,11 @@ export default function Header(props) {
                 <Box
                   component="img"
                   sx={{ marginRight: "1em", height: 30 }}
-                  src={
-                    "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
-                  }
-                  alt="Bosch Logo"
+                  src={Logo}
+                  alt="Header Logo"
                 />
                 <Typography component="span" variant="h5">
-                  Split My Bill
+                  Split & Settle
                 </Typography>
               </Box>
               <Box>
@@ -96,9 +78,9 @@ export default function Header(props) {
                   }}
                 >
                   <AccountPopover
-                    displayName={props.currentUser.displayName}
+                    displayName={props.currentUser.name}
                     email={props.currentUser.email}
-                    pfp={photoURL ? photoURL : ""}
+                    pfp={props.currentUser.picture}
                   />
                 </Stack>
               </Box>

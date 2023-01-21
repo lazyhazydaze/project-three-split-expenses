@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import InvoiceCard from "./InvoiceCard";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Box, Container, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import SavingsIcon from "@mui/icons-material/Savings";
 import Sidebar from "./Sidebar";
 import axios from "axios";
 
@@ -25,8 +26,6 @@ export default function InvoiceRetrieve(props) {
     getInvoiceList();
   }, [groupId]);
 
-  const navigate = useNavigate();
-
   return (
     <Container sx={{ maxWidth: { xl: 1280 } }}>
       <Box mt={2} display="flex">
@@ -41,6 +40,16 @@ export default function InvoiceRetrieve(props) {
               justifyContent: "flex-end",
             }}
           >
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SavingsIcon />}
+              component={Link}
+              to={`/group/${groupId}/settle`}
+            >
+              Settle It
+            </Button>
+
             <Button
               variant="contained"
               size="small"

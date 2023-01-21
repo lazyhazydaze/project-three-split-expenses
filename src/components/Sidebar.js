@@ -40,8 +40,8 @@ export default function Sidebar(props) {
   }, [props.currentUser]);
 
   return (
-    <div style={{ display: "flex" }}>
-      <Box ml={4} mt={8} width={250} minWidth={250}>
+    <div>
+      <Box mr={4} mt={8} width={250} minWidth={250}>
         <Box textAlign="center" mb={2}>
           <Button
             variant="contained"
@@ -73,19 +73,6 @@ export default function Sidebar(props) {
             </List>
           </Typography>
         </Box>
-
-        {/* <Box mt={1}>
-          <Typography variant="body2" component="span">
-            Group 2 here
-          </Typography>
-        </Box> */}
-
-        {/* <Box mt={1} mb={3}></Box> */}
-
-        {/* <Typography variant="subtitle2">Friends</Typography>
-        <Divider />
-
-        <Box mt={1}>friends go here</Box> */}
       </Box>
 
       <Outlet />

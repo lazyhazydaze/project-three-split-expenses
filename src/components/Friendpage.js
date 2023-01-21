@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Avatar from "@mui/material/Avatar";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
-import "./Friendpage.css";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 
 export function Friendpage(props) {
   // Form field to send friend request with email
@@ -23,6 +38,7 @@ export function Friendpage(props) {
           friendId: object.user2.id,
           name: object.user2.name,
           email: object.user2.email,
+          picture: object.user2.picture,
         });
       } else {
         filteredarray.push({
@@ -30,6 +46,7 @@ export function Friendpage(props) {
           friendId: object.user1.id,
           name: object.user1.name,
           email: object.user1.email,
+          picture: object.user1.picture,
         });
       }
     });
@@ -119,45 +136,140 @@ export function Friendpage(props) {
 
   return (
     <div>
-      Add Friend:{" "}
-      <input
-        type="text"
-        placeholder="Email here"
-        value={recipientEmail}
-        onChange={(e) => setRecipientEmail(e.target.value)}
-      />
-      <button onClick={sendFriendRequest}>Send</button>
-      <h1>My Friends:</h1>
-      {friendList.length > 0 &&
-        friendList.map((friend) => (
-          <div key={friend.friendId}>
-            <p>
-              {friend.name}---{friend.email}{" "}
-              <button onClick={() => deleteCurrentFriend(friend.rowId)}>
-                Delete friend
-              </button>
-            </p>
-          </div>
-        ))}
-      <h1>Requests received from:</h1>
-      {requestsReceived.map((request) => (
-        <div key={request.id}>
-          <p>
-            {request.sender.name}---{request.sender.email}{" "}
-            <button onClick={() => acceptRequest(request.id)}>Accept</button>
-            <button onClick={() => rejectRequest(request.id)}>Reject</button>
-          </p>
-        </div>
-      ))}
-      <h1>Requests sent to:</h1>
-      {requestsSent.map((request) => (
-        <div key={request.id}>
-          <p>
-            {request.recipient.name}---{request.recipient.email}{" "}
-            <button onClick={() => rejectRequest(request.id)}>Delete</button>
-          </p>
-        </div>
-      ))}
+      <center>
+        <input
+          type="text"
+          placeholder="add friend email"
+          value={recipientEmail}
+          onChange={(e) => setRecipientEmail(e.target.value)}
+        />
+        <button onClick={sendFriendRequest}>Send</button>
+      </center>
+
+      <Grid
+        container
+        justifyContent="space-evenly"
+        alignItems="stretch"
+        spacing={3}
+      >
+        <Grid item lg={4} md={8} sm={6} xs={12}>
+          <Card>
+            <CardContent>
+              <CardHeader
+                title={
+                  <Typography variant="h5">
+                    Friends ({friendList.length > 0 ? friendList.length : 0}){" "}
+                  </Typography>
+                }
+              />
+              {friendList.length > 0 && (
+                <List>
+                  {friendList.map((friend) => (
+                    <ListItem>
+                      <ListItemAvatar>
+                        <Avatar alt="pfp" src={friend.picture} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={`${friend.name}`}
+                        secondary={<>{friend.email}</>}
+                      />
+                      <ListItemSecondaryAction>
+                        <ListItemIcon>
+                          <button
+                            onClick={() => deleteCurrentFriend(friend.rowId)}
+                          >
+                            Delete friend
+                          </button>
+                        </ListItemIcon>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item lg={4} md={12} sm={12} xs={12}>
+          <Grid container spacing={3}>
+            <Grid item sm={6} xs={12} md={4} lg={12}>
+              <Card>
+                <CardContent>
+                  <CardHeader
+                    title={
+                      <Typography variant="h5">
+                        Pending requests (
+                        {requestsReceived.length > 0
+                          ? requestsReceived.length
+                          : 0}
+                        )
+                      </Typography>
+                    }
+                  />
+                  <List>
+                    {requestsReceived.map((request) => (
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar alt="pfp" src={request.sender.picture} />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={`${request.sender.name}`}
+                          secondary={<>{request.sender.email}</>}
+                        />
+                        <ListItemSecondaryAction>
+                          <ListItemIcon>
+                            <CheckCircleOutlineOutlinedIcon
+                              onClick={() => acceptRequest(request.id)}
+                            />
+                            <CancelOutlinedIcon
+                              onClick={() => rejectRequest(request.id)}
+                            />
+                          </ListItemIcon>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item sm={6} xs={12} md={4} lg={12}>
+              <Card>
+                <CardContent>
+                  <CardHeader
+                    title={
+                      <Typography variant="h5">
+                        Sent requests (
+                        {requestsSent.length > 0 ? requestsSent.length : 0})
+                      </Typography>
+                    }
+                  />
+                  <List>
+                    {requestsSent.map((request) => (
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar alt="pfp" src={request.recipient.picture} />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={`${request.recipient.name}`}
+                          secondary={<>{request.recipient.email}</>}
+                        />
+                        <ListItemSecondaryAction>
+                          <ListItemIcon>
+                            <button onClick={() => rejectRequest(request.id)}>
+                              Delete
+                            </button>
+                          </ListItemIcon>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </div>
   );
 }

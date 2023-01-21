@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from "react";
-
-// Placeholder contactlist for selection purposes
-// import { contactList } from "../data";
+import React, { useState } from "react";
 
 // Libraries for styling
-import Select from "react-select";
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -17,7 +13,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Card, CardContent, Container, FormControl } from "@mui/material";
+import { Card, CardContent, Container } from "@mui/material";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
@@ -29,53 +25,40 @@ export default function InvoiceForm(props) {
 
   let { groupId } = useParams();
 
-  const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of ""
+  //const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of ""
 
   // maybe i dun need these 3 below but i can put them inside the detailed invoice display?
   // =====================================================
   // const [chooseMembers, setChooseMembers] = useState([]);
-  const helper = (arrayofobjects) => {
-    let filteredarray = [];
-    arrayofobjects.forEach((object) => {
-      filteredarray.push({
-        value: object.email,
-        label: object.name,
-      });
-    });
-    return filteredarray;
-  };
+  // const helper = (arrayofobjects) => {
+  //   let filteredarray = [];
+  //   arrayofobjects.forEach((object) => {
+  //     filteredarray.push({
+  //       value: object.email,
+  //       label: object.name,
+  //     });
+  //   });
+  //   return filteredarray;
+  // };
 
-  const getGroupMembers = async () => {
-    let group = await axios.get(
-      `${process.env.REACT_APP_API_SERVER}/groups/${groupId}`
-    );
-    console.log("current active group: ", helper(group.data.users));
-    setCurrentGroupData(group.data);
-    // setChooseMembers(helper(group.data.users));
-  };
+  // const getGroupMembers = async () => {
+  //   let group = await axios.get(
+  //     `${process.env.REACT_APP_API_SERVER}/groups/${groupId}`
+  //   );
+  //   console.log("current active group: ", helper(group.data.users));
+  //   setCurrentGroupData(group.data);
+  //   // setChooseMembers(helper(group.data.users));
+  // };
 
-  useEffect(() => {
-    getGroupMembers();
-  }, [groupId]);
+  // useEffect(() => {
+  //   getGroupMembers();
+  // }, [groupId]);
   // ======================================================
 
   const [invoice, setInvoice] = useState("");
-  // const [author, setAuthor] = useState({
-  //   username: props.currentUser.name,
-  //   email: props.currentUser.email,
-  // });
   const [date, setDate] = useState(dayjs());
 
-  // the list of selectedFriends will always include the author
-  // this state is different from the "chooseMembers" state
-  //... actually no need this what members from the group will be in the invoice
-  // const [selectedFriends, setSelectedFriends] = useState([
-  //   {
-  //     value: props.currentUser.email,
-  //     label: props.currentUser.name,
-  //     isFixed: true,
-  //   },
-  // ]);
+  // members from the group will be in the invoice automatically
 
   const [titleError, setTitleError] = useState(true);
   const [titleErrorMessage, setTitleErrorMessage] = useState(
@@ -96,23 +79,6 @@ export default function InvoiceForm(props) {
     }
     setInvoice(titleValue);
   };
-
-  // add the currentUser to the top of the contact list and set it as a default fixed option.
-
-  // when currentUser change, replace the author and the first element of the selectedFriends to be the new currentUser.
-  // useEffect(() => {
-  //   setAuthor({
-  //     username: props.currentUser.name,
-  //     email: props.currentUser.email,
-  //   });
-  //   const newGroup = [...selectedFriends];
-  //   newGroup[0] = {
-  //     value: props.currentUser.email,
-  //     label: props.currentUser.name,
-  //     isFixed: true,
-  //   };
-  //   setSelectedFriends(newGroup);
-  // }, [props.currentUser]);
 
   const createNewInvoice = async (name, date) => {
     let newInvoice = {
@@ -148,31 +114,6 @@ export default function InvoiceForm(props) {
     }
   };
 
-  //  const handleNext = (e) => {
-  //    e.preventDefault();
-  //    if (activeStep === 0) {
-  //      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  //    } else if (activeStep === 1 && !titleError && date && date.isValid()) {
-  //      const dbRef = push(databaseRef(database, "invoice"));
-  //      set(dbRef, {
-  //        invoice,
-  //        author,
-  //        date: date.format("DD/MM/YYYY"),
-  //        group: selectedFriends,
-  //      });
-  //      setInvoice("");
-  //      setDate(dayjs());
-  //      setSelectedFriends([
-  //        {
-  //          value: props.currentUser.email,
-  //          label: props.currentUser.displayName,
-  //          isFixed: true,
-  //        },
-  //      ]);
-  //      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  //    }
-  //  };
-
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -180,44 +121,6 @@ export default function InvoiceForm(props) {
   const handleReset = () => {
     setActiveStep(0);
   };
-
-  // const step1 = (
-  //   <FormControl
-  //     required
-  //     sx={{ mt: 4, mb: 30, width: "100%" }}
-  //     variant="standard"
-  //   >
-  //     <Select
-  //       closeMenuOnSelect={false}
-  //       options={chooseMembers}
-  //       value={selectedFriends}
-  //       defaultValue={chooseMembers[0]}
-  //       onChange={setSelectedFriends}
-  //       isSearchable={true}
-  //       isMulti
-  //       styles={{
-  //         multiValue: (base, state) => {
-  //           return state.data.isFixed
-  //             ? { ...base, backgroundColor: "gray" }
-  //             : base;
-  //         },
-  //         multiValueLabel: (base, state) => {
-  //           return state.data.isFixed
-  //             ? {
-  //                 ...base,
-  //                 fontWeight: "bold",
-  //                 color: "white",
-  //                 paddingRight: 6,
-  //               }
-  //             : base;
-  //         },
-  //         multiValueRemove: (base, state) => {
-  //           return state.data.isFixed ? { ...base, display: "none" } : base;
-  //         },
-  //       }}
-  //     />
-  //   </FormControl>
-  // );
 
   const step2 = (
     <Box
