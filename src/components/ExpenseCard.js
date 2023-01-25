@@ -49,7 +49,7 @@ export default function ExpenseCard(props) {
   return (
     <ListItem>
       <ListItemAvatar>
-        <IconButton aria-label="delete" onClick={deleteRecord}>
+        <IconButton disabled onClick={deleteRecord}>
           <DeleteIcon />
         </IconButton>
       </ListItemAvatar>

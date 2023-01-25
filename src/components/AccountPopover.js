@@ -37,7 +37,7 @@ export default function AccountPopover(props) {
 
   const MENU_OPTIONS = [
     {
-      label: "Profile Page",
+      label: "Account",
       action: handleClose,
     },
     {

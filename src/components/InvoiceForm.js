@@ -25,9 +25,8 @@ export default function InvoiceForm(props) {
 
   let { groupId } = useParams();
 
-  //const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of ""
+  //const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of "". Because empty object is still taken as empty object so it will still try to retrieve an empty object.
 
-  // maybe i dun need these 3 below but i can put them inside the detailed invoice display?
   // =====================================================
   // const [chooseMembers, setChooseMembers] = useState([]);
   // const helper = (arrayofobjects) => {
@@ -47,7 +46,7 @@ export default function InvoiceForm(props) {
   //   );
   //   console.log("current active group: ", helper(group.data.users));
   //   setCurrentGroupData(group.data);
-  //   // setChooseMembers(helper(group.data.users));
+  //   setChooseMembers(helper(group.data.users));
   // };
 
   // useEffect(() => {

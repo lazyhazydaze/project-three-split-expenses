@@ -21,6 +21,7 @@ import {
   Container,
   Card,
   CardContent,
+  Toolbar,
 } from "@mui/material";
 import { Avatar } from "@mui/material";
 
@@ -158,6 +159,7 @@ export default function DetailedInvoiceDisplay(props) {
     <center>
       <span>
         <Button
+          disabled
           variant="outlined"
           size="small"
           startIcon={<DeleteForeverIcon />}
@@ -222,7 +224,7 @@ export default function DetailedInvoiceDisplay(props) {
 
   const displaySplitBill = (
     <div>
-      {expensesData ? (
+      {expensesData.length > 0 ? (
         <div>
           {groupMembersData && (
             <Box>
@@ -247,6 +249,7 @@ export default function DetailedInvoiceDisplay(props) {
 
   return (
     <div>
+      <Toolbar />
       <Container sx={{ maxWidth: { xl: 980 } }}>
         <Box mt={2}>
           <Card>
@@ -288,7 +291,7 @@ export default function DetailedInvoiceDisplay(props) {
                   <br />
                   {displayAllExpenses}
                   <br />
-                  {clearAllButton}
+                  {expensesData.length > 0 && clearAllButton}
                 </TabPanel>
 
                 <TabPanel value={value} index={1}>
@@ -317,7 +320,9 @@ const ContactsIterator = (props) => {
           currentgroup.map((contact) => (
             <ListItem>
               <ListItemAvatar>
-                <Avatar src={""}>{contact.name.charAt(0).toUpperCase()}</Avatar>
+                <Avatar src={contact.picture}>
+                  {contact.name.charAt(0).toUpperCase()}
+                </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={`${contact.name}`}
