@@ -1,14 +1,42 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Paper, Typography } from "@mui/material";
+import {
+  Container,
+  Divider,
+  Paper,
+  TextField,
+  Typography,
+  IconButton,
+  Button,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function GroupForm(props) {
   // Textfield for group name
   // Add group members
   // Save button
   const [friendList, setFriendList] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([{ name: "", email: "" }]);
+  const [selectedUsers, setSelectedUsers] = useState([{ email: "" }]);
   const [groupNameField, setGroupNameField] = useState("");
+  const [titleError, setTitleError] = useState(true);
+  const [titleErrorMessage, setTitleErrorMessage] = useState(
+    "Field cannot be blank."
+  );
+
+  const validateTitle = (titleValue) => {
+    if (titleValue === "") {
+      setTitleError(true);
+      setTitleErrorMessage("Field cannot be blank.");
+    } else if (titleValue.length > 30) {
+      setTitleError(true);
+      setTitleErrorMessage(
+        `Max 30 char (Current: ${titleValue.length} char). `
+      );
+    } else {
+      setTitleError(false);
+    }
+    setGroupNameField(titleValue);
+  };
 
   const helper = (arrayofobjects) => {
     let filteredarray = [];
@@ -53,37 +81,45 @@ export default function GroupForm(props) {
   const createNewGroup = async (name, users) => {
     // create an array of group members ids
     const userIdsArray = users.map(({ email }) => {
+      var id = -1;
       for (let i = 0; i < friendList.length; i++) {
         // what are some other ways of iterating?
         if (friendList[i].email === email) {
-          return friendList[i].friendId;
+          id = friendList[i].friendId;
+          break;
         }
       }
+      return id;
     });
-    let selectedUserIds = [props.currentUser.id, ...userIdsArray];
-    let group = {
-      name,
-      selectedUserIds,
-    };
-    let response = await axios.post(
-      `${process.env.REACT_APP_API_SERVER}/groups`,
-      group
-    );
-    console.log("create group response", response.data);
+    console.log("japanese goblin", userIdsArray);
+    if (userIdsArray.filter((x) => x === -1).length === 0) {
+      let selectedUserIds = [props.currentUser.id, ...userIdsArray];
+      let group = {
+        name,
+        selectedUserIds,
+      };
+      let response = await axios.post(
+        `${process.env.REACT_APP_API_SERVER}/groups`,
+        group
+      );
+      props.setForceRefresh(true);
+      setGroupNameField("");
+      setSelectedUsers([{ name: "", email: "" }]);
+      console.log("create group response", response.data);
+    } else {
+      console.log("error error");
+    }
   };
 
   const submit = (e) => {
     e.preventDefault();
-    createNewGroup(groupNameField, selectedUsers);
+    if (!titleError) createNewGroup(groupNameField, selectedUsers);
     // console.log("selectedUsers", selectedUsers);
     // console.log("groupname is: ", groupNameField);
-    setGroupNameField("");
-    setSelectedUsers([{ name: "", email: "" }]);
   };
 
   const addFields = () => {
     let object = {
-      name: "",
       email: "",
     };
 
@@ -103,42 +139,74 @@ export default function GroupForm(props) {
           variant="outlined"
           sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
         >
-          <Typography component="h1" variant="h4" align="center">
+          <Typography component="h1" variant="h4" align="center" gutterBottom>
             + New Group
           </Typography>
-          <h4>This group is called...</h4>
-          <input
-            name="groupname"
-            placeholder="Group name..."
-            onChange={({ target }) => setGroupNameField(target.value)}
+          <br />
+          <Typography
+            sx={{ color: "text.secondary" }}
+            variant="button"
+            display="block"
+            gutterBottom
+          >
+            THIS GROUP IS CALLED...
+          </Typography>
+
+          <TextField
+            required
+            label="Group Title"
             value={groupNameField}
-          />{" "}
+            onChange={({ target }) => validateTitle(target.value)}
+            error={titleError}
+            helperText={titleError && titleErrorMessage}
+            variant="filled"
+            size="small"
+          />
           <br />
           <br />
-          <h4>Group members</h4>
+          <Divider light />
+          <br />
+
+          <Typography
+            sx={{ color: "text.secondary" }}
+            variant="button"
+            display="block"
+            gutterBottom
+          >
+            GROUP MEMBERS
+          </Typography>
+          <Typography
+            sx={{ fontStyle: "oblique" }}
+            variant="body2"
+            gutterBottom
+          >
+            {props.currentUser.name} ({props.currentUser.email})
+          </Typography>
           {selectedUsers.map((form, index) => {
             return (
               <div key={index}>
-                <input
-                  name="name"
-                  placeholder="Name"
-                  onChange={(event) => handleFormChange(event, index)}
-                  value={form.name}
-                />
                 <input
                   name="email"
                   placeholder="Email"
                   onChange={(event) => handleFormChange(event, index)}
                   value={form.email}
                 />
-                <button onClick={() => removeFields(index)}>Remove</button>
+                <IconButton size="small" onClick={() => removeFields(index)}>
+                  <CloseIcon sx={{ color: "error.main" }} fontSize="small" />
+                </IconButton>
               </div>
             );
           })}
-          <button onClick={addFields}>Add More</button>
+          <Button onClick={addFields} size="small">
+            + Add a person
+          </Button>
           <br />
           <br />
-          <button onClick={submit}>Save</button>
+          <Divider light />
+          <br />
+          <Button onClick={submit} variant="contained" size="large">
+            Save
+          </Button>
         </Paper>
       </Container>
     </div>

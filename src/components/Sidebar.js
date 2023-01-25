@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
   Divider,
   Button,
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
+  ListSubheader,
+  Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { Link, Outlet } from "react-router-dom";
+import GroupsIcon from "@mui/icons-material/Groups";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 export default function Sidebar(props) {
@@ -37,45 +40,60 @@ export default function Sidebar(props) {
 
   useEffect(() => {
     getGroupList();
-  }, [props.currentUser]);
+    props.setForceRefresh(false);
+  }, [props.currentUser, props.forceRefresh]);
 
   return (
     <div>
-      <Box mr={4} mt={8} width={250} minWidth={250}>
-        <Box textAlign="center" mb={2}>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            component={Link}
-            to={`/creategroup`}
-          >
-            New Group
-          </Button>
-        </Box>
-
-        <Typography variant="subtitle2">Groups</Typography>
-        <Divider />
-
-        <Box mt={2}>
-          <Typography variant="body2">
-            <List>
-              {groupList.map((group) => (
-                <ListItem disablePadding>
-                  <ListItemButton
-                    component={Link}
-                    to={`/group/${group.groupId}/invoices`}
-                  >
-                    <ListItemText primary={group.name} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Typography>
-        </Box>
+      <Box textAlign="center" mt={1} mb={3}>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          component={Link}
+          to={`/creategroup`}
+        >
+          New Group
+        </Button>
       </Box>
 
-      <Outlet />
+      <Divider />
+      <List subheader={<ListSubheader>Groups</ListSubheader>}>
+        {groupList.length > 0 ? (
+          groupList.map((group) => (
+            <ListItem key={group.groupId} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={`/group/${group.groupId}/invoices`}
+              >
+                <ListItemIcon>
+                  <GroupsIcon />
+                </ListItemIcon>
+                <ListItemText primary={group.name} />
+              </ListItemButton>
+            </ListItem>
+          ))
+        ) : (
+          <Box textAlign="center" mt={1} mb={3}>
+            <Typography
+              color="text.secondary"
+              variant="body2"
+              display="inline"
+              gutterBottom
+            >
+              Click on{" "}
+              <Typography
+                color="primary.main"
+                variant="button"
+                display="inline"
+              >
+                + New Group
+              </Typography>{" "}
+              button to begin.
+            </Typography>
+          </Box>
+        )}
+      </List>
     </div>
   );
 }

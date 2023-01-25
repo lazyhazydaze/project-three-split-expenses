@@ -4,7 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import axios from "axios";
 import "./App.css";
 
-import Header from "./components/Header";
+import MainLayout from "./components/MainLayout";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceRetrieve from "./components/InvoiceRetrieve";
 import DetailedInvoiceDisplay from "./components/DetailedInvoiceDisplay";
@@ -17,6 +17,7 @@ import GroupBalance from "./components/GroupBalance";
 export default function App() {
   const [currentUser, setCurrentUser] = useState({});
   const { isLoading, user, isAuthenticated, loginWithRedirect } = useAuth0();
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   const createOrGetUser = async (name, email, picture) => {
     let newUser = {
@@ -48,7 +49,16 @@ export default function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Header currentUser={currentUser} />}>
+        <Route
+          path="/"
+          element={
+            <MainLayout
+              setForceRefresh={setForceRefresh}
+              forceRefresh={forceRefresh}
+              currentUser={currentUser}
+            />
+          }
+        >
           <Route path="/" element={<Dashboard currentUser={currentUser} />} />
           <Route
             path="dashboard"
@@ -56,7 +66,12 @@ export default function App() {
           />
           <Route
             path="creategroup"
-            element={<GroupForm currentUser={currentUser} />}
+            element={
+              <GroupForm
+                setForceRefresh={setForceRefresh}
+                currentUser={currentUser}
+              />
+            }
           />
           <Route
             path="contacts"
