@@ -5,15 +5,38 @@ import InputAdornment from "@mui/material/InputAdornment";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import IconButton from "@mui/material/IconButton";
+import { useTheme } from "@mui/material/styles";
 import {
   InputLabel,
   MenuItem,
   TextField,
   Select as MuiSelect,
+  OutlinedInput,
 } from "@mui/material";
 import axios from "axios";
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(name, personName, theme) {
+  return {
+    fontWeight:
+      personName.indexOf(name) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+
 export default function ExpenseForm(props) {
+  const theme = useTheme();
   const [item, setItem] = useState("");
   const [amount, setAmount] = useState("");
   const [payerOptions, setPayerOptions] = useState([]);
@@ -29,7 +52,7 @@ export default function ExpenseForm(props) {
     "Field cannot be blank."
   );
 
-  const helperPayer = (arrayofobjects) => {
+  const helper = (arrayofobjects) => {
     let filteredarray = [];
     arrayofobjects.forEach((object) => {
       filteredarray.push({
@@ -41,26 +64,26 @@ export default function ExpenseForm(props) {
     return filteredarray;
   };
 
-  const helperSpender = (arrayofobjects) => {
-    let filteredarray = [];
-    arrayofobjects.forEach((object) => {
-      filteredarray.push({
-        value: object.id,
-        label: object.name,
-      });
-    });
-    return filteredarray;
-  };
+  // const helperSpender = (arrayofobjects) => {
+  //   let filteredarray = [];
+  //   arrayofobjects.forEach((object) => {
+  //     filteredarray.push({
+  //       value: object.id,
+  //       label: object.name,
+  //     });
+  //   });
+  //   return filteredarray;
+  // };
 
   // get the list of users of the group from groupId params to populate splitby field
   const getGroupMembers = async () => {
     let group = await axios.get(
       `${process.env.REACT_APP_API_SERVER}/groups/${props.groupId}`
     );
-    console.log("payer options: ", helperPayer(group.data.users));
-    console.log("spender options: ", helperSpender(group.data.users));
-    setPayerOptions(helperPayer(group.data.users));
-    setSpenderOptions(helperSpender(group.data.users));
+    console.log("payer options: ", helper(group.data.users));
+    console.log("spender options: ", helper(group.data.users));
+    setPayerOptions(helper(group.data.users));
+    setSpenderOptions(helper(group.data.users));
   };
 
   useEffect(() => {
@@ -93,15 +116,23 @@ export default function ExpenseForm(props) {
     setAmount(amountValue);
   };
 
+  const handleChangeSpenders = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSplitBy(
+      // produces array of id e.g. [2,3,4]
+      typeof value === "string" ? value.split(",") : value
+    );
+  };
+
   const createNewExpense = async (name, price, payerid, spenders) => {
-    const spenderIdsArray = spenders.map(({ value }) => value);
     console.log("spenderrrrrrs: ", spenders);
-    console.log("spenderIdsArrayyyyyy: ", spenderIdsArray);
     let newExpense = {
       name: name,
       amount: price,
       payerId: payerid,
-      splitByIds: spenderIdsArray,
+      splitByIds: spenders,
     };
     await axios
       .post(
@@ -114,6 +145,7 @@ export default function ExpenseForm(props) {
         setAmount("");
         setPayer("");
         setSplitBy([]);
+        props.reloadAllExpenses();
       });
   };
 
@@ -121,7 +153,7 @@ export default function ExpenseForm(props) {
     e.preventDefault();
     if (!(itemError || amountError || splitBy.length === 0 || payer === "")) {
       createNewExpense(item, amount, payer, splitBy);
-      props.reloadAllExpenses();
+      //cannot put reload function here. or it will run at the same time
     }
   };
 
@@ -164,39 +196,45 @@ export default function ExpenseForm(props) {
         </FormControl>
       </center>
       <center>
-        <FormControl fullWidth>
+        <FormControl required sx={{ m: 2, width: "80ch" }} variant="outlined">
           <InputLabel>Who paid?</InputLabel>
           <MuiSelect
             value={payer}
-            label="Payer"
+            label="Who paid?"
             onChange={(e) => {
               setPayer(e.target.value);
             }}
           >
             {payerOptions.map((person) => (
-              <MenuItem
-                key={person.userId}
-                value={person.userId} //or should this be payer.email?
-              >
+              <MenuItem key={person.userId} value={person.userId}>
                 {person.name}
               </MenuItem>
             ))}
           </MuiSelect>
         </FormControl>
       </center>
-      <br />
-      <br />
       <center>
-        <FormControl required sx={{ width: "80ch" }} variant="standard">
-          <Select
-            closeMenuOnSelect={false}
-            options={spenderOptions}
+        <FormControl required sx={{ m: 2, width: "80ch" }}>
+          <InputLabel>Split with?</InputLabel>
+          <MuiSelect
+            multiple
             value={splitBy}
-            onChange={setSplitBy}
-            isSearchable={true}
-            isMulti
-          />
+            onChange={handleChangeSpenders}
+            input={<OutlinedInput label="Split with?" />}
+            MenuProps={MenuProps}
+          >
+            {spenderOptions.map((user) => (
+              <MenuItem
+                key={user.userId}
+                value={user.userId}
+                style={getStyles(user.userId, splitBy, theme)}
+              >
+                {user.name}
+              </MenuItem>
+            ))}
+          </MuiSelect>
         </FormControl>
+        {console.log("what is splitby? ", splitBy)}
       </center>
       <br />
       <center>
