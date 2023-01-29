@@ -40,6 +40,7 @@ export default function GroupBalance(props) {
   // get the breakdown of each group member's net balance from backend
 
   const getGroupBalance = async () => {
+    // expensesRouter --> getEachGroupExpenses
     let response = await axios.get(
       `${process.env.REACT_APP_API_SERVER}/expenses/group/${groupId}`
     );
@@ -58,7 +59,9 @@ export default function GroupBalance(props) {
       Object.keys(groupBalance).forEach((personidkey) => {
         for (let i = 0; i < usersInGroup.length; i++) {
           if (Number(usersInGroup[i].id) === Number(personidkey)) {
-            newtally[usersInGroup[i].name] = groupBalance[personidkey];
+            newtally[usersInGroup[i].name] = Number(
+              groupBalance[personidkey]
+            ).toFixed(2);
           }
         }
       });
@@ -119,7 +122,7 @@ export default function GroupBalance(props) {
               component="a"
               startIcon={<ArrowBackIcon fontSize="small" />}
             >
-              Back to {groupName}
+              Back to Group: {groupName}
             </Button>
           </MuiLink>
           {!isEmptyObject(debts) ? (
