@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Select from "react-select";
 import FormControl from "@mui/material/FormControl";
+import Snackbar from "@mui/material/Snackbar";
 import InputAdornment from "@mui/material/InputAdornment";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
@@ -12,6 +12,8 @@ import {
   TextField,
   Select as MuiSelect,
   OutlinedInput,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import axios from "axios";
 
@@ -51,6 +53,7 @@ export default function ExpenseForm(props) {
   const [amountErrorMessage, setAmountErrorMessage] = useState(
     "Field cannot be blank."
   );
+  const [openAlert, setOpenAlert] = useState(false);
 
   const helper = (arrayofobjects) => {
     let filteredarray = [];
@@ -145,6 +148,7 @@ export default function ExpenseForm(props) {
         setAmount("");
         setPayer("");
         setSplitBy([]);
+        setOpenAlert(true);
         props.reloadAllExpenses();
       });
   };
@@ -155,6 +159,14 @@ export default function ExpenseForm(props) {
       createNewExpense(item, amount, payer, splitBy);
       //cannot put reload function here. or it will run at the same time
     }
+  };
+
+  const handleCloseAlert = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenAlert(false);
   };
 
   return (
@@ -242,6 +254,20 @@ export default function ExpenseForm(props) {
           <AddCircleOutlinedIcon color="primary" sx={{ fontSize: 40 }} />
         </IconButton>
       </center>
+      <Snackbar
+        open={openAlert}
+        autoHideDuration={2000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          onClose={handleCloseAlert}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          <AlertTitle>Success</AlertTitle>
+          Expense added.
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

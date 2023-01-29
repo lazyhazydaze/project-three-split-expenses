@@ -8,6 +8,8 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import SendIcon from "@mui/icons-material/Send";
 
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Card,
@@ -29,6 +31,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   OutlinedInput,
+  Snackbar,
   Typography,
 } from "@mui/material";
 
@@ -95,6 +98,18 @@ export function Friendpage(props) {
   const [requestsReceived, setRequestsReceived] = useState([]);
   const [requestsSent, setRequestsSent] = useState([]);
 
+  const [successAlert, setSuccessAlert] = useState(false);
+  const [errorAlert, setErrorAlert] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleCloseAlert = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setErrorAlert(false);
+    setSuccessAlert(false);
+  };
+
   const helper = (arrayofobjects) => {
     let filteredarray = [];
     arrayofobjects.forEach((object) => {
@@ -157,9 +172,15 @@ export function Friendpage(props) {
         recipient_email: recipientEmail,
       })
       .then((response) => {
-        console.log(response.data);
+        console.log("send success response.data: ", response.data);
         setRecipientEmail("");
         getSentRequests();
+        setSuccessAlert(true);
+      })
+      .catch((error) => {
+        console.log("send error response data: ", error.response.data.msg);
+        setErrorAlert(true);
+        setErrorMessage(error.response.data.msg);
       });
   };
 
@@ -227,6 +248,34 @@ export function Friendpage(props) {
           <IconButton onClick={sendFriendRequest}>
             <SendIcon color="primary" />
           </IconButton>
+          <Snackbar
+            open={successAlert}
+            autoHideDuration={2000}
+            onClose={handleCloseAlert}
+          >
+            <Alert
+              onClose={handleCloseAlert}
+              severity="success"
+              sx={{ width: "100%" }}
+            >
+              <AlertTitle>Success</AlertTitle>
+              Friend request sent.
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={errorAlert}
+            autoHideDuration={2000}
+            onClose={handleCloseAlert}
+          >
+            <Alert
+              onClose={handleCloseAlert}
+              severity="error"
+              sx={{ width: "100%" }}
+            >
+              <AlertTitle>Error</AlertTitle>
+              {errorMessage}
+            </Alert>
+          </Snackbar>
           <br />
         </Box>
 
