@@ -1,4 +1,5 @@
 export function resolveDebts(debts) {
+  console.log(debts);
   // Create an empty dictionary to store the results
   let resolvedDebts = {};
 
@@ -11,11 +12,19 @@ export function resolveDebts(debts) {
   let negativeDebts = [];
   for (let i = 0; i < keys.length; i++) {
     if (values[i] > 0) {
-      positiveDebts.push({ user: keys[i], debt: values[i] });
+      positiveDebts.push({
+        user: keys[i],
+        debt: 100 * Number(values[i]).toFixed(2),
+      });
     } else {
-      negativeDebts.push({ user: keys[i], debt: values[i] });
+      negativeDebts.push({
+        user: keys[i],
+        debt: 100 * Number(values[i]).toFixed(2),
+      });
     }
   }
+  console.log(JSON.stringify(positiveDebts));
+  console.log(JSON.stringify(negativeDebts));
 
   // Sort the arrays by debt in descending and ascending order, respectively
   positiveDebts.sort((a, b) => b.debt - a.debt);
@@ -30,6 +39,8 @@ export function resolveDebts(debts) {
     // Get the current user and debt
     let currentUser = positiveDebts[positiveIndex].user;
     let currentDebt = positiveDebts[positiveIndex].debt;
+    console.log(currentUser);
+    console.log(currentDebt);
 
     // Check if there are still negative debts to be paid
     if (negativeIndex < negativeDebts.length) {
@@ -38,7 +49,8 @@ export function resolveDebts(debts) {
       let negativeDebt = negativeDebts[negativeIndex].debt;
 
       // Calculate the amount the current user should pay
-      let amountToPay = Math.min(currentDebt, -negativeDebt);
+      let amountToPay = Math.min(currentDebt, Math.abs(negativeDebt));
+      console.log(amountToPay);
       currentDebt -= amountToPay;
       negativeDebts[negativeIndex].debt += amountToPay;
 
@@ -46,7 +58,7 @@ export function resolveDebts(debts) {
       if (!(currentUser in resolvedDebts)) {
         resolvedDebts[currentUser] = {};
       }
-      resolvedDebts[currentUser][negativeUser] = amountToPay;
+      resolvedDebts[currentUser][negativeUser] = amountToPay / 100;
 
       // If the negative debt has been fully paid, move to the next one
       if (negativeDebts[negativeIndex].debt === 0) {
@@ -62,7 +74,6 @@ export function resolveDebts(debts) {
       positiveIndex++;
     }
   }
+  console.log("end of resolved Debts");
   return resolvedDebts;
 }
-
-// thank you ChatGPT.
