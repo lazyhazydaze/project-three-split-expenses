@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Libraries for styling
 import dayjs from "dayjs";
@@ -13,9 +13,16 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Card, CardContent, Container } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Container,
+  Link as MuiLink,
+  Toolbar,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 const steps = ["Add Title & Date"];
 
@@ -24,35 +31,20 @@ export default function InvoiceForm(props) {
   //author is an object, same as currentUser {displayName: "", email:""}
 
   let { groupId } = useParams();
-
+  const [groupName, setGroupName] = useState("");
   //const [currentGroupData, setCurrentGroupData] = useState(""); //why will this not work if it's initiated as {} instead of "". Because empty object is still taken as empty object so it will still try to retrieve an empty object.
 
-  // =====================================================
-  // const [chooseMembers, setChooseMembers] = useState([]);
-  // const helper = (arrayofobjects) => {
-  //   let filteredarray = [];
-  //   arrayofobjects.forEach((object) => {
-  //     filteredarray.push({
-  //       value: object.email,
-  //       label: object.name,
-  //     });
-  //   });
-  //   return filteredarray;
-  // };
+  const getGroupName = async () => {
+    let group = await axios.get(
+      `${process.env.REACT_APP_API_SERVER}/groups/${groupId}`
+    );
+    console.log("current active group: ", group.data.name);
+    setGroupName(group.data.name);
+  };
 
-  // const getGroupMembers = async () => {
-  //   let group = await axios.get(
-  //     `${process.env.REACT_APP_API_SERVER}/groups/${groupId}`
-  //   );
-  //   console.log("current active group: ", helper(group.data.users));
-  //   setCurrentGroupData(group.data);
-  //   setChooseMembers(helper(group.data.users));
-  // };
-
-  // useEffect(() => {
-  //   getGroupMembers();
-  // }, [groupId]);
-  // ======================================================
+  useEffect(() => {
+    getGroupName();
+  }, [groupId]);
 
   const [invoice, setInvoice] = useState("");
   const [date, setDate] = useState(dayjs());
@@ -153,57 +145,69 @@ export default function InvoiceForm(props) {
   const stepForm = [step2];
 
   return (
-    <Container sx={{ maxWidth: { xl: 800 } }}>
-      <Box my={10}>
-        <Card>
-          <CardContent>
-            <Stepper activeStep={activeStep}>
-              {steps.map((label, index) => {
-                const stepProps = {};
-                const labelProps = {};
+    <>
+      <Toolbar />
+      <Container sx={{ maxWidth: { xl: 800 } }}>
+        <MuiLink
+          underline="none"
+          component={Link}
+          to={`/group/${groupId}/invoices`}
+        >
+          <Button component="a" startIcon={<ArrowBackIcon fontSize="small" />}>
+            Back to Group: {groupName}
+          </Button>
+        </MuiLink>
+        <Box my={10}>
+          <Card>
+            <CardContent>
+              <Stepper activeStep={activeStep}>
+                {steps.map((label, index) => {
+                  const stepProps = {};
+                  const labelProps = {};
 
-                return (
-                  <Step key={label} {...stepProps}>
-                    <StepLabel {...labelProps}>{label}</StepLabel>
-                  </Step>
-                );
-              })}
-            </Stepper>
-            {activeStep === steps.length ? (
-              <React.Fragment>
-                <Typography sx={{ mt: 2, mb: 1 }}>
-                  Invoice created! Click on Invoices to edit the record.
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                  <Box sx={{ flex: "1 1 auto" }} />
-                  <Button onClick={handleReset}>Create another</Button>
-                </Box>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                <Typography sx={{ mt: 2, mb: 1 }}>
-                  {stepForm[activeStep]}
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                  <Button
-                    color="inherit"
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    sx={{ mr: 1 }}
-                  >
-                    Back
-                  </Button>
-                  <Box sx={{ flex: "1 1 auto" }} />
+                  return (
+                    <Step key={label} {...stepProps}>
+                      <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+              {activeStep === steps.length ? (
+                <React.Fragment>
+                  <Typography sx={{ mt: 2, mb: 1 }}>
+                    Invoice created! Go back to group to edit.
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Box sx={{ flex: "1 1 auto" }} />
+                    <Button onClick={handleReset}>Create another</Button>
+                  </Box>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <Typography sx={{ mt: 2, mb: 1 }}>
+                    {stepForm[activeStep]}
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Button
+                      color="inherit"
+                      disabled={activeStep === 0}
+                      onClick={handleBack}
+                      sx={{ mr: 1 }}
+                    >
+                      Back
+                    </Button>
+                    <Box sx={{ flex: "1 1 auto" }} />
 
-                  <Button onClick={handleNext}>
-                    {activeStep === steps.length - 1 ? "Submit" : "Next"}
-                  </Button>
-                </Box>
-              </React.Fragment>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-    </Container>
+                    <Button onClick={handleNext}>
+                      {activeStep === steps.length - 1 ? "Submit" : "Next"}
+                    </Button>
+                  </Box>
+                </React.Fragment>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+      </Container>
+    </>
   );
 }

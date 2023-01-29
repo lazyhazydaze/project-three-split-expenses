@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -14,6 +15,8 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import {
+  Avatar,
+  Link as MuiLink,
   List,
   ListItem,
   ListItemAvatar,
@@ -23,12 +26,11 @@ import {
   CardContent,
   Toolbar,
 } from "@mui/material";
-import { Avatar } from "@mui/material";
 
 import ExpenseCard from "./ExpenseCard";
 import ExpenseForm from "./ExpenseForm";
 import ReceiptDisplay from "./ReceiptDisplay";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 
 /****************************************************************/
@@ -71,6 +73,7 @@ export default function DetailedInvoiceDisplay(props) {
   const [invoiceData, setInvoiceData] = useState("");
   const [groupMembersData, setGroupMembersData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
+  const [groupName, setGroupName] = useState("");
 
   // axios get invoice name, author, date, groupname details from backend
   const getInvoiceData = async () => {
@@ -79,6 +82,7 @@ export default function DetailedInvoiceDisplay(props) {
     );
     console.log("invoice details: ", invoicedata.data);
     setInvoiceData(invoicedata.data);
+    setGroupName(invoicedata.data.group.name);
   };
 
   // axios get group members data from backend
@@ -97,6 +101,18 @@ export default function DetailedInvoiceDisplay(props) {
     );
     console.log("expenses list: ", expenseList.data);
     setExpensesData(expenseList.data);
+  };
+
+  // axios delete all expenses for specific invoice from backend
+  const clearRecords = async () => {
+    await axios
+      .delete(
+        `${process.env.REACT_APP_API_SERVER}/expenses/invoice/${invoiceId}`
+      )
+      .then((response) => {
+        console.log("clear all expense response: ", response.data);
+        getExpenses();
+      });
   };
 
   useEffect(() => {
@@ -122,10 +138,6 @@ export default function DetailedInvoiceDisplay(props) {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const clearRecords = () => {
-    console.log("add in router for clear records ");
   };
 
   const addButton = (
@@ -159,7 +171,6 @@ export default function DetailedInvoiceDisplay(props) {
     <center>
       <span>
         <Button
-          disabled
           variant="outlined"
           size="small"
           startIcon={<DeleteForeverIcon />}
@@ -216,6 +227,7 @@ export default function DetailedInvoiceDisplay(props) {
             itemName={expense.name}
             itemPrice={expense.amount}
             paidby={expense.payer.name}
+            refreshExpenseList={getExpenses}
           />
         ))}
       </List>
@@ -248,9 +260,18 @@ export default function DetailedInvoiceDisplay(props) {
   );
 
   return (
-    <div>
+    <>
       <Toolbar />
       <Container sx={{ maxWidth: { xl: 980 } }}>
+        <MuiLink
+          underline="none"
+          component={Link}
+          to={`/group/${groupId}/invoices`}
+        >
+          <Button component="a" startIcon={<ArrowBackIcon fontSize="small" />}>
+            Back to Group: {groupName}
+          </Button>
+        </MuiLink>
         <Box mt={2}>
           <Card>
             <CardContent>
@@ -306,7 +327,7 @@ export default function DetailedInvoiceDisplay(props) {
           </Card>
         </Box>
       </Container>
-    </div>
+    </>
   );
 }
 
