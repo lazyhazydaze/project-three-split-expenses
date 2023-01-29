@@ -8,6 +8,12 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import axios from "axios";
 
@@ -42,16 +48,23 @@ export default function ExpenseCard(props) {
     getSpenders();
   }, [props.expenseid]);
 
+  const deleteExpense = async (expense) => {
+    await axios
+      .delete(`${process.env.REACT_APP_API_SERVER}/expenses/${expense}`)
+      .then((response) => {
+        console.log("delete expense response: ", response.data);
+        props.refreshExpenseList();
+      });
+  };
+
   const deleteRecord = () => {
-    console.log("add in router for delete record");
+    deleteExpense(props.expenseid);
   };
 
   return (
     <ListItem>
       <ListItemAvatar>
-        <IconButton disabled onClick={deleteRecord}>
-          <DeleteIcon />
-        </IconButton>
+        <TrashcanIcon deleteFunction={deleteRecord} />
       </ListItemAvatar>
       <ListItemText
         primary={props.itemName.toUpperCase()}
@@ -68,4 +81,54 @@ export default function ExpenseCard(props) {
   );
 }
 
-// add in a text for paidby too
+const TrashcanIcon = (props) => {
+  const [clearOpen, setClearOpen] = useState(false);
+
+  return (
+    <span>
+      <IconButton
+        onClick={() => {
+          setClearOpen(true);
+        }}
+        aria-label="delete"
+        size="small"
+      >
+        <DeleteIcon />
+      </IconButton>
+
+      <Dialog
+        open={clearOpen}
+        onClose={() => {
+          setClearOpen(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm delete?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure? This action is irreversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setClearOpen(false);
+            }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setClearOpen(false);
+              props.deleteFunction();
+            }}
+            autoFocus
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </span>
+  );
+};
