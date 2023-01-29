@@ -42,6 +42,7 @@ export default function InvoiceRetrieve(props) {
   useEffect(() => {
     getInvoiceList();
     getCurrentGroupData();
+    console.log(groupId);
   }, [groupId]);
 
   return (
@@ -123,7 +124,7 @@ export default function InvoiceRetrieve(props) {
                       props.currentUser.email === invoice.author.email
                     }
                     key={invoice.id}
-                    idvalue={invoice.id}
+                    refreshInvoiceList={getInvoiceList}
                   />
                 ))
               ) : (

@@ -1,20 +1,36 @@
 import React, { useState } from "react";
-import { Paper, Typography, Link as MuiLink, Box } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Link as MuiLink,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import ContactsIcon from "@mui/icons-material/AccountCircle";
 import { Link } from "react-router-dom";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButton from "@mui/material/IconButton";
+import axios from "axios";
+import EditInvoiceForm from "./EditInvoiceForm";
 
 export default function InvoiceCard(props) {
   const [elevation, setElevation] = useState(1);
-  //idvalue properties is passed from InvoiceRetrieve.js, which is the key of the Invoice in db.
-  //clickMe properties
-  //deleterights properties
-  //expensekey properties
-  const deleteInvoice = (e) => {
-    e.preventDefault();
-    console.log("add a delete route for invoice");
+  // properties is passed from InvoiceRetrieve.js, which is the key of the Invoice in db.
+
+  const deleteInvoice = async () => {
+    await axios
+      .delete(`${process.env.REACT_APP_API_SERVER}/invoices/${props.invoiceid}`)
+      .then((response) => {
+        console.log("delete invoice response: ", response.data);
+        props.refreshInvoiceList();
+      });
   };
+
   return (
     <MuiLink
       component={Link}
@@ -22,7 +38,6 @@ export default function InvoiceCard(props) {
       underline="none"
       onMouseEnter={() => setElevation(3)}
       onMouseLeave={() => setElevation(1)}
-      //onClick={props.clickMe}
     >
       <Paper
         sx={{
@@ -57,17 +72,14 @@ export default function InvoiceCard(props) {
           </Box>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {props.deleterights && (
-              // <button value={props.expensekey} onClick={deleteInvoice}>
-              //   ✖
-              // </button>
-              <IconButton
-                aria-label="delete"
-                value={props.expensekey}
-                onClick={deleteInvoice}
-                size="small"
-              >
-                <ClearIcon fontSize="inherit" />
-              </IconButton>
+              <span>
+                <EditInvoiceForm
+                  invoiceid={props.invoiceid}
+                  invoicename={props.name}
+                  refreshList={props.refreshInvoiceList}
+                />
+                <XButton deleteFunction={deleteInvoice} />
+              </span>
             )}
           </Box>
         </Box>
@@ -76,15 +88,58 @@ export default function InvoiceCard(props) {
   );
 }
 
-// <div id={props.idvalue} onClick={props.clickMe}>
-//   <div className="card">
-//     <h3>{props.invoice}</h3>
-//     <p>{props.date}</p>
-//     <p>By: {props.author.username}</p>
-//     {props.deleterights && (
-//       <button value={props.expensekey} onClick={deleteInvoice}>
-//         ✖
-//       </button>
-//     )}
-//   </div>
-// </div>
+const XButton = (props) => {
+  const [clearOpen, setClearOpen] = useState(false);
+
+  return (
+    <span
+      onClick={(e) => {
+        e.preventDefault();
+      }}
+    >
+      <IconButton
+        onClick={() => {
+          setClearOpen(true);
+        }}
+        aria-label="delete"
+        size="small"
+      >
+        <ClearIcon fontSize="inherit" />
+      </IconButton>
+
+      <Dialog
+        open={clearOpen}
+        onClose={() => {
+          setClearOpen(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm delete?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure? This action is irreversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setClearOpen(false);
+            }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setClearOpen(false);
+              props.deleteFunction();
+            }}
+            autoFocus
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </span>
+  );
+};
