@@ -10,13 +10,14 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import UseAutocomplete from "./GroupFormField";
 
 export default function GroupForm(props) {
   // Textfield for group name
   // Add group members
   // Save button
   const [friendList, setFriendList] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([{ email: "" }]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [groupNameField, setGroupNameField] = useState("");
   const [titleError, setTitleError] = useState(true);
   const [titleErrorMessage, setTitleErrorMessage] = useState(
@@ -64,7 +65,7 @@ export default function GroupForm(props) {
     let friends = await axios.get(
       `${process.env.REACT_APP_API_SERVER}/friends/user/${props.currentUser.id}`
     );
-    console.log("friendlist.data: ", friends.data);
+    console.log("friendlist.data: ", helper(friends.data));
     setFriendList(helper(friends.data));
   };
 
@@ -72,25 +73,27 @@ export default function GroupForm(props) {
     getFriendList();
   }, [props.currentUser]);
 
-  const handleFormChange = (event, index) => {
+  const handleFormChange = (value, index) => {
     let data = [...selectedUsers];
-    data[index][event.target.name] = event.target.value;
+    if (value) {
+      // if valid, make value show in text box
+      data[index] = value;
+    } else {
+      // if not valid, initialise back to empty
+      data[index] = { email: "" };
+    }
+    //data[index][event.target.name] = value;
+    console.log(value);
+    console.log("selectedusers data:", data);
     setSelectedUsers(data);
   };
 
   const createNewGroup = async (name, users) => {
     // create an array of group members ids
-    const userIdsArray = users.map(({ email }) => {
-      var id = -1;
-      for (let i = 0; i < friendList.length; i++) {
-        // what are some other ways of iterating?
-        if (friendList[i].email === email) {
-          id = friendList[i].friendId;
-          break;
-        }
-      }
-      return id;
+    const userIdsArray = users.map(({ friendId }) => {
+      return friendId ? friendId : -1;
     });
+
     console.log("japanese goblin", userIdsArray);
     if (userIdsArray.filter((x) => x === -1).length === 0) {
       let selectedUserIds = [props.currentUser.id, ...userIdsArray];
@@ -98,16 +101,16 @@ export default function GroupForm(props) {
         name,
         selectedUserIds,
       };
-      let response = await axios.post(
-        `${process.env.REACT_APP_API_SERVER}/groups`,
-        group
-      );
-      props.setForceRefresh(true);
-      setGroupNameField("");
-      setSelectedUsers([{ name: "", email: "" }]);
-      console.log("create group response", response.data);
+      await axios
+        .post(`${process.env.REACT_APP_API_SERVER}/groups`, group)
+        .then((response) => {
+          props.setForceRefresh(true);
+          setGroupNameField("");
+          setSelectedUsers([{ name: "", email: "" }]);
+          console.log("create group response", response.data);
+        });
     } else {
-      console.log("error error");
+      alert("error adding group");
     }
   };
 
@@ -184,12 +187,12 @@ export default function GroupForm(props) {
           </Typography>
           {selectedUsers.map((form, index) => {
             return (
-              <div key={index}>
-                <input
-                  name="email"
-                  placeholder="Email"
-                  onChange={(event) => handleFormChange(event, index)}
-                  value={form.email}
+              <div key={index} style={{ display: "flex" }}>
+                <UseAutocomplete
+                  optionlist={friendList}
+                  onChange={handleFormChange}
+                  value={form}
+                  index={index}
                 />
                 <IconButton size="small" onClick={() => removeFields(index)}>
                   <CloseIcon sx={{ color: "error.main" }} fontSize="small" />
